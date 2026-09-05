@@ -15,12 +15,18 @@ public class ProductController : Controller
         _httpClient.BaseAddress = new Uri(config["BackendUrl"] ?? "http://localhost:5001");
     }
 
-    public async Task<IActionResult> Index(int? editId)
+    // GANZ WICHTIG: Nur DIESE EINE Index-Methode darf im Controller existieren!
+    // GET: / (To-Do-Liste anzeigen mit optionalen Such- und Edit-Parametern)
+    public async Task<IActionResult> Index(int? editId, string? search, string? priorityFilter)
     {
-        // Merken, welche ID gerade editiert werden soll
         ViewData["EditId"] = editId;
+        ViewData["CurrentSearch"] = search;
+        ViewData["CurrentPriorityFilter"] = priorityFilter;
 
-        var response = await _httpClient.GetAsync("/api/todos");
+        // Dynamischen API-Pfad mit Query-Parametern für das Backend zusammenbauen
+        var url = $"/api/todos?search={Uri.EscapeDataString(search ?? "")}&priority={Uri.EscapeDataString(priorityFilter ?? "")}";
+
+        var response = await _httpClient.GetAsync(url);
         if (!response.IsSuccessStatusCode) return View(new List<TodoViewModel>());
 
         var content = await response.Content.ReadAsStringAsync();
@@ -30,6 +36,7 @@ public class ProductController : Controller
         return View(todos);
     }
 
+    // POST: /Product/Create (Neues To-Do hinzufügen)
     [HttpPost]
     public async Task<IActionResult> Create(string title, DateTime? dueDate, string? notes, string priority)
     {
@@ -37,10 +44,10 @@ public class ProductController : Controller
         var content = new StringContent(JsonSerializer.Serialize(newTodo), Encoding.UTF8, "application/json");
 
         await _httpClient.PostAsync("/api/todos", content);
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index), new { search = cookiesOrParam(null), priorityFilter = cookiesOrParam(null) });
     }
 
-    // NEU: Aktion zum Speichern der bearbeiteten Aufgabe
+    // POST: /Product/Edit (Aufgabe aktualisieren)
     [HttpPost]
     public async Task<IActionResult> Edit(int id, string title, DateTime? dueDate, string? notes, string priority, bool isCompleted)
     {
@@ -51,8 +58,7 @@ public class ProductController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-
-    // POST: /Product/Toggle (Status ändern)
+    // POST: /Product/Toggle (Status Erledigt/Offen umschalten)
     [HttpPost]
     public async Task<IActionResult> Toggle(int id)
     {
@@ -60,12 +66,14 @@ public class ProductController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // NEU: POST: /Product/Delete (Aufgabe löschen)
+    // POST: /Product/Delete (Aufgabe löschen)
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
         await _httpClient.DeleteAsync($"/api/todos/{id}");
         return RedirectToAction(nameof(Index));
     }
+
+    private string? cookiesOrParam(string? val) => val; // Hilfsfunktion für sauberes Routing
 }
 

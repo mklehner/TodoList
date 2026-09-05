@@ -42,6 +42,31 @@
         </form>
     </div>
 
+    <!-- 🔍 NEU: Such- und Filterleiste (Dark Design) -->
+    <div class="card p-2 shadow-sm mb-3 bg-dark border-secondary">
+        <form asp-action="Index" method="get" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control form-control-sm bg-dark text-white border-secondary" 
+                       placeholder="Aufgaben durchsuchen..." value="@ViewData["CurrentSearch"]" />
+            </div>
+            <div class="col-md-4">
+                <select name="priorityFilter" class="form-select form-select-sm bg-dark text-white border-secondary">
+                    <option value="Alle" selected="@(ViewData["CurrentPriorityFilter"]?.ToString() == "Alle")">Alle Prioritäten</option>
+                    <option value="Hoch" selected="@(ViewData["CurrentPriorityFilter"]?.ToString() == "Hoch")">Nur Hoch</option>
+                    <option value="Mittel" selected="@(ViewData["CurrentPriorityFilter"]?.ToString() == "Mittel")">Nur Mittel</option>
+                    <option value="Niedrig" selected="@(ViewData["CurrentPriorityFilter"]?.ToString() == "Niedrig")">Nur Niedrig</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-sm btn-info w-100 text-darkfw-bold">Filtern</button>
+                @if (!string.IsNullOrEmpty(ViewData["CurrentSearch"]?.ToString()) || !string.IsNullOrEmpty(ViewData["CurrentPriorityFilter"]?.ToString()))
+                {
+                    <a asp-action="Index" class="btn btn-sm btn-outline-light">X</a>
+                }
+            </div>
+        </form>
+    </div>
+
     <!-- Liste der To-Dos -->
     <ul class="list-group shadow-sm border-secondary">
         @if (!Model.Any())
@@ -85,7 +110,8 @@
                             </div>
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-sm btn-success">Speichern</button>
-                                <a asp-action="Index" class="btn btn-sm btn-light">Abbrechen</a>
+                                <!-- Suchen Sie diese Zeile im Bearbeitungsmodus und ersetzen Sie sie: -->
+                                <a asp-action="Index" asp-route-search="@ViewData["CurrentSearch"]" asp-route-priorityFilter="@ViewData["CurrentPriorityFilter"]" class="btn btn-sm btn-light">Abbrechen</a>
                             </div>
                         </div>
                     </form>
