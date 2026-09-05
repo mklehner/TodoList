@@ -15,9 +15,11 @@ public class ProductController : Controller
         _httpClient.BaseAddress = new Uri(config["BackendUrl"] ?? "http://localhost:5001");
     }
 
-    // GET: / (To-Do-Liste anzeigen)
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int? editId)
     {
+        // Merken, welche ID gerade editiert werden soll
+        ViewData["EditId"] = editId;
+
         var response = await _httpClient.GetAsync("/api/todos");
         if (!response.IsSuccessStatusCode) return View(new List<TodoViewModel>());
 
@@ -28,16 +30,27 @@ public class ProductController : Controller
         return View(todos);
     }
 
-    // POST: /Product/Create (Neues To-Do hinzufügen)
     [HttpPost]
-    public async Task<IActionResult> Create(string title, DateTime? dueDate)
+    public async Task<IActionResult> Create(string title, DateTime? dueDate, string? notes, string priority)
     {
-        var newTodo = new { Title = title, IsCompleted = false, DueDate = dueDate };
+        var newTodo = new { Title = title, IsCompleted = false, DueDate = dueDate, Notes = notes, Priority = priority };
         var content = new StringContent(JsonSerializer.Serialize(newTodo), Encoding.UTF8, "application/json");
 
         await _httpClient.PostAsync("/api/todos", content);
         return RedirectToAction(nameof(Index));
     }
+
+    // NEU: Aktion zum Speichern der bearbeiteten Aufgabe
+    [HttpPost]
+    public async Task<IActionResult> Edit(int id, string title, DateTime? dueDate, string? notes, string priority, bool isCompleted)
+    {
+        var updatedTodo = new { Id = id, Title = title, IsCompleted = isCompleted, DueDate = dueDate, Notes = notes, Priority = priority };
+        var content = new StringContent(JsonSerializer.Serialize(updatedTodo), Encoding.UTF8, "application/json");
+
+        await _httpClient.PutAsync($"/api/todos/{id}", content);
+        return RedirectToAction(nameof(Index));
+    }
+
 
     // POST: /Product/Toggle (Status ändern)
     [HttpPost]

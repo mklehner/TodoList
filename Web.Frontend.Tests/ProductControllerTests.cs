@@ -7,19 +7,34 @@ using Moq.Protected;
 using Web.Frontend.Controllers;
 using Web.Frontend.Models;
 using Xunit;
+using System.Text.Json;
 
 namespace Web.Frontend.Tests;
 
 public class ProductControllerTests
 {
+    private readonly Mock<IHttpClientFactory> _factoryMock;
+    private readonly Mock<HttpMessageHandler> _handlerMock;
+    private readonly Mock<IConfiguration> _configMock;
+
+    public ProductControllerTests()
+    {
+        _handlerMock = new Mock<HttpMessageHandler>();
+        _factoryMock = new Mock<IHttpClientFactory>();
+        _configMock = new Mock<IConfiguration>();
+
+        var httpClient = new HttpClient(_handlerMock.Object)
+        {
+            BaseAddress = new Uri("http://localhost:5001")
+        };
+        _factoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+    }
+
     [Fact]
     public async Task Index_ReturnsViewWithProducts_WhenApiCallIsSuccessful()
     {
-        // 1. ARRANGEMENT (Vorbereitung)
-        
-        // Wir simulieren eine erfolgreiche HTTP-Antwort der REST-API mit einer leeren JSON-Liste "[]"
-        var handlerMock = new Mock<HttpMessageHandler>();
-        handlerMock
+        // ARRANGEMENT
+        _handlerMock
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
@@ -32,69 +47,136 @@ public class ProductControllerTests
                 Content = new StringContent("[]", Encoding.UTF8, "application/json")
             });
 
-        var httpClient = new HttpClient(handlerMock.Object)
-        {
-            BaseAddress = new Uri("http://localhost:5001")
-        };
+        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
-        // IHttpClientFactory mocken, damit sie unseren manipulierten HttpClient ausgibt
-        var factoryMock = new Mock<IHttpClientFactory>();
-        factoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+        // ACT
+        var result = await controller.Index(editId: null);
 
-        // Leere Konfiguration simulieren
-        var configMock = new Mock<IConfiguration>();
-
-        // Controller mit den vorgetäuschten Abhängigkeiten instanziieren
-        var controller = new ProductController(factoryMock.Object, configMock.Object);
-
-        // 2. ACT (Ausführung der zu testenden Methode)
-        var result = await controller.Index();
-
-        // 3. ASSERT (Überprüfung des Ergebnisses)
+        // ASSERT
         var viewResult = Assert.IsType<ViewResult>(result);
         var model = Assert.IsAssignableFrom<IEnumerable<TodoViewModel>>(viewResult.Model);
-        Assert.Empty(model); // Der Zustand muss leer sein, da wir "[]" zurückgegeben haben
+        Assert.Empty(model);
     }
 
     [Fact]
-    public async Task Delete_SendsDeleteRequestToApi_AndRedirectsToIndex()
+    public async Task Create_SendsPostRequestToApi_WithAllParameters()
     {
-        // 1. ARRANGEMENT
-        var handlerMock = new Mock<HttpMessageHandler>();
-        handlerMock
+        // ARRANGEMENT
+        string capturedJson = string.Empty;
+
+        _handlerMock
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>()
             )
-            // Wir simulieren die HTTP-Antwort 204 NoContent, die unsere REST-API beim Löschen sendet
-            .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.NoContent })
-            .Verifiable(); // Sicherstellen, dass der Aufruf stattfindet
+            .Callback<HttpRequestMessage, CancellationToken>(async (req, token) =>
+            {
+                // Hier lesen wir den Content sicher asynchron aus, bevor wir die Warnung auslösen
+                if (req.Content != null)
+                {
+                    capturedJson = await req.Content.ReadAsStringAsync(token);
+                }
+            })
+            .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.Created });
 
-        var httpClient = new HttpClient(handlerMock.Object)
-        {
-            BaseAddress = new Uri("http://localhost:5001")
-        };
+        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
-        var factoryMock = new Mock<IHttpClientFactory>();
-        factoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
-        var configMock = new Mock<IConfiguration>();
+        // ACT
+        var result = await controller.Create("Bewerbung abschicken", DateTime.Today, "C# Projekt zeigen", "Hoch");
 
-        var controller = new ProductController(factoryMock.Object, configMock.Object);
-        int testTodoId = 42;
-
-        // 2. ACT
-        var result = await controller.Delete(testTodoId);
-
-        // 3. ASSERT
-        // Prüfen, ob das Ergebnis ein Redirect (Weiterleitung) ist
+        // ASSERT
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-        // Prüfen, ob zur Methode "Index" weitergeleitet wird
         Assert.Equal("Index", redirectResult.ActionName);
 
-        // Prüfen, ob der HTTP-Aufruf exakt mit der ID 42 an die API ging
-        handlerMock.Protected().Verify(
+        // Prüfen, ob die Werte im abgefangenen JSON vorhanden sind
+        Assert.Contains("Bewerbung abschicken", capturedJson);
+        Assert.Contains("Hoch", capturedJson);
+
+        _handlerMock.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Post),
+            ItExpr.IsAny<CancellationToken>()
+        );
+    }
+
+    [Fact]
+    public async Task Edit_SendsPutRequestToApi_AndRedirectsToIndex()
+    {
+        // ARRANGEMENT
+        string capturedJson = string.Empty;
+        int testId = 1;
+
+        _handlerMock
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .Callback<HttpRequestMessage, CancellationToken>(async (req, token) =>
+            {
+                if (req.Content != null)
+                {
+                    capturedJson = await req.Content.ReadAsStringAsync(token);
+                }
+            })
+            .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
+
+            var controller = new ProductController(_factoryMock.Object, _configMock.Object);
+
+        // ACT
+        var result = await controller.Edit(testId, "Titel geändert", DateTime.Today, "Neue Notiz", "Niedrig", isCompleted: false);
+
+        // ASSERT
+        var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Index", redirectResult.ActionName);
+
+        // NEU & UMLAUT-SICHER: Wir deserialisieren das JSON wieder in ein dynamisches Dictionary
+        var deserializedTodo = JsonSerializer.Deserialize<Dictionary<string, object>>(capturedJson, 
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        Assert.NotNull(deserializedTodo);
+        // Nun vergleichen wir den echten Textinhalt, unabhängig von der Unicode-Codierung (\u00E4)
+        Assert.Equal("Titel geändert", deserializedTodo["Title"].ToString());
+
+        _handlerMock.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req => 
+                req.Method == HttpMethod.Put && 
+                req.RequestUri!.ToString().EndsWith($"/api/todos/{testId}")),
+            ItExpr.IsAny<CancellationToken>()
+        );
+    }
+
+
+    [Fact]
+    public async Task Delete_SendsDeleteRequestToApi_AndRedirectsToIndex()
+    {
+        // ARRANGEMENT
+        _handlerMock
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.NoContent });
+
+        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
+        int testTodoId = 42;
+
+        // ACT
+        var result = await controller.Delete(testTodoId);
+
+        // ASSERT
+        var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Index", redirectResult.ActionName);
+
+        _handlerMock.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req => 

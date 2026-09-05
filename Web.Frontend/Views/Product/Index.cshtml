@@ -2,79 +2,144 @@
 
 @{
     ViewData["Title"] = "Meine To-Do Liste";
-    // Das heutige Datum als reines Datum ohne Uhrzeit für den Vergleich
     var heute = DateTime.Today;
+    int? editId = ViewData["EditId"] as int?;
 }
 
-<div class="container mt-5" style="max-width: 700px;">
-    <h2 class="text-center mb-4">📝 Meine To-Do Liste</h2>
+<style>
+    body { background-color: #121212 !important; color: #ffffff !important; }
+</style>
+
+<div class="container mt-5" style="max-width: 800px;">
+    <h2 class="text-center mb-4 text-muted">🛠️ Meine To-Do Liste</h2>
     
     <!-- Formular für neue Aufgaben -->
-    <div class="card p-3 shadow-sm mb-4">
-        <form asp-action="Create" method="post" class="row g-2">
-            <div class="col-md-7">
-                <input type="text" name="title" class="form-control" placeholder="Was steht heute an?" required />
+    <div class="card p-3 shadow-sm mb-4 bg-secondary text-white border-secondary">
+        <form asp-action="Create" method="post">
+            <div class="row g-2 mb-2">
+                <div class="col-md-6">
+                    <input type="text" name="title" class="form-control bg-dark text-white border-secondary" placeholder="Was steht heute an?" required />
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="dueDate" class="form-control bg-dark text-white border-secondary" title="Ablaufdatum" />
+                </div>
+                <div class="col-md-3">
+                    <select name="priority" class="form-select bg-dark text-white border-secondary">
+                        <option value="Niedrig">Prio: Niedrig</option>
+                        <option value="Mittel" selected>Prio: Mittel</option>
+                        <option value="Hoch">Prio: Hoch</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-3">
-                <input type="date" name="dueDate" class="form-control" title="Fälligkeitsdatum (optional)" />
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-success w-100">Plus</button>
+            <div class="row g-2">
+                <div class="col-md-10">
+                    <input type="text" name="notes" class="form-control bg-dark text-white border-secondary" placeholder="Details oder Notizen..." />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success w-100">Plus</button>
+                </div>
             </div>
         </form>
     </div>
 
     <!-- Liste der To-Dos -->
-    <ul class="list-group shadow-sm">
+    <ul class="list-group shadow-sm border-secondary">
         @if (!Model.Any())
         {
-            <li class="list-group-item text-center text-muted py-4">Alles erledigt! Keine offenen Aufgaben.</li>
+            <li class="list-group-item text-center text-muted py-4 bg-dark border-secondary">Alles erledigt!</li>
         }
         @foreach (var item in Model)
         {
-            // Logik: Ist die Aufgabe offen und das Datum liegt vor heute?
             bool istUeberfaellig = !item.IsCompleted && item.DueDate.HasValue && item.DueDate.Value.Date < heute;
             
-            // Dynamische CSS-Klassen für den Hintergrund und Rahmen vergeben
-            string listenKlasse = istUeberfaellig ? "list-group-item-danger border-danger" : "";
-            string badgeKlasse = istUeberfaellig ? "bg-danger animate-pulse" : "bg-secondary";
+            // Prioritäten-Farbe festlegen
+            string prioBadge = item.Priority == "Hoch" ? "bg-danger" : item.Priority == "Mittel" ? "bg-warning text-dark" : "bg-info text-dark";
+            string listenKlasse = istUeberfaellig ? "list-group-item-danger border-danger text-dark" : "bg-dark text-white border-secondary";
 
-            <li class="list-group-item d-flex justify-content-between align-items-center @listenKlasse" style="transition: all 0.3s ease;">
-                <div>
-                    <!-- Titel -->
-                    <span class="fw-bold" style="@(item.IsCompleted ? "text-decoration: line-through; color: gray;" : "")">
-                        @item.Title
-                    </span>
-                    
-                    <!-- Fälligkeitsdatum -->
-                    @if (item.DueDate.HasValue)
-                    {
-                        <span class="badge @badgeKlasse ms-2 text-white" style="font-size: 0.75rem;">
-                            @(istUeberfaellig ? "⚠️ Überfällig seit: " : "📅 Bis: ") @item.DueDate.Value.ToString("dd.MM.yyyy")
+            if (editId.HasValue && editId.Value == item.Id)
+            {
+                <!-- 🛠️ BEARBEITUNGS-MODUS (Zeile wechselt in Input-Felder) -->
+                <li class="list-group-item bg-secondary p-3 border-info">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <input type="hidden" name="isCompleted" value="@item.IsCompleted.ToString().ToLower()" />
+                        
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <input type="text" name="title" class="form-control form-control-sm bg-dark text-white" value="@item.Title" required />
+                            </div>
+                            <div class="col-md-3">
+                                <input type="date" name="dueDate" class="form-control form-control-sm bg-dark text-white" value="@(item.DueDate?.ToString("yyyy-MM-dd"))" />
+                            </div>
+                            <div class="col-md-3">
+                                <select name="priority" class="form-select form-select-sm bg-dark text-white">
+                                    <option value="Niedrig" selected="@(item.Priority == "Niedrig")">Niedrig</option>
+                                    <option value="Mittel" selected="@(item.Priority == "Mittel")">Mittel</option>
+                                    <option value="Hoch" selected="@(item.Priority == "Hoch")">Hoch</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1 me-2">
+                                <input type="text" name="notes" class="form-control form-control-sm bg-dark text-white" value="@item.Notes" placeholder="Keine Notiz vorhanden" />
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-sm btn-success">Speichern</button>
+                                <a asp-action="Index" class="btn btn-sm btn-light">Abbrechen</a>
+                            </div>
+                        </div>
+                    </form>
+                </li>
+            }
+            else
+            {
+                <!-- 👀 ANZEIGE-MODUS (Standard) -->
+                <li class="list-group-item d-flex justify-content-between align-items-center @listenKlasse">
+                    <div>
+                        <!-- Prio Badge -->
+                        <span class="badge @prioBadge me-2" style="font-size: 0.7rem;">@item.Priority</span>
+
+                        <!-- Titel -->
+                        <span class="fw-bold" style="@(item.IsCompleted ? "text-decoration: line-through; color: #888888;" : "")">
+                            @item.Title
                         </span>
-                    }
-                </div>
-                
-                <!-- Aktionen -->
-                <div class="d-flex gap-2">
-                    <form asp-action="Toggle" method="post" class="m-0">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        @if (item.IsCompleted)
+                        
+                        <!-- Datum -->
+                        @if (item.DueDate.HasValue)
                         {
-                            <button type="submit" class="btn btn-sm btn-secondary">Öffnen</button>
+                            <span class="badge @(istUeberfaellig ? "bg-danger" : "bg-secondary") ms-2 text-white" style="font-size: 0.75rem;">
+                                @(istUeberfaellig ? "⚠️ Überfällig: " : "📅 ") @item.DueDate.Value.ToString("dd.MM.yyyy")
+                            </span>
                         }
-                        else
-                        {
-                            <button type="submit" class="btn btn-sm btn-primary">Erledigen</button>
-                        }
-                    </form>
 
-                    <form asp-action="Delete" method="post" class="m-0" onsubmit="return confirm('Diese Aufgabe wirklich löschen?');">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <button type="submit" class="btn btn-sm btn-danger">Löschen</button>
-                    </form>
-                </div>
-            </li>
+                        <!-- Notiz -->
+                        @if (!string.IsNullOrEmpty(item.Notes))
+                        {
+                            <div class="small @(istUeberfaellig ? "text-dark-50" : "text-muted") mt-1" style="font-style: italic;">
+                                💬 @item.Notes
+                            </div>
+                        }
+                    </div>
+                    
+                    <!-- Aktionen -->
+                    <div class="d-flex gap-2">
+                        <!-- Edit Button (Lädt die Seite neu und übergibt die aktuelle ID) -->
+                        <a asp-action="Index" asp-route-editId="@item.Id" class="btn btn-sm btn-outline-info">Bearbeiten</a>
+
+                        <form asp-action="Toggle" method="post" class="m-0">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-sm @(item.IsCompleted ? "btn-secondary" : "btn-primary")">
+                                @(item.IsCompleted ? "Öffnen" : "Erledigen")
+                            </button>
+                        </form>
+
+                        <form asp-action="Delete" method="post" class="m-0" onsubmit="return confirm('Diese Aufgabe wirklich löschen?');">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Löschen</button>
+                        </form>
+                    </div>
+                </li>
+            }
         }
     </ul>
 </div>

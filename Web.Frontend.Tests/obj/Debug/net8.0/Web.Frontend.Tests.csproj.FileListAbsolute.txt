@@ -107,3 +107,4 @@
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.pdb
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.genruntimeconfig.cache
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/ref/Web.Frontend.Tests.dll
+/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.sourcelink.json

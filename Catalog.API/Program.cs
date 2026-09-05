@@ -22,17 +22,17 @@ using (var scope = app.Services.CreateScope())
 
 // REST-Endpunkte für die To-Do-Liste
 app.MapGet("/api/todos", async (CatalogDbContext db) => 
-    await db.Todos.ToListAsync());
+    await db.Todos.OrderByDescending(t => t.Priority == "Hoch")
+                  .ThenByDescending(t => t.Priority == "Mittel")
+                  .ToListAsync());
 
 app.MapPost("/api/todos", async (TodoItem todo, CatalogDbContext db) =>
 {
-    // Der UTC-Zwang-Code wurde entfernt, da Npgsql jetzt das normale Datum akzeptiert!
     db.Todos.Add(todo);
     await db.SaveChangesAsync();
     return Results.Created($"/api/todos/{todo.Id}", todo);
 });
 
-// Endpunkt um den Status (Erledigt/Offen) zu toggeln
 app.MapPut("/api/todos/{id}/toggle", async (int id, CatalogDbContext db) =>
 {
     var todo = await db.Todos.FindAsync(id);
@@ -43,7 +43,21 @@ app.MapPut("/api/todos/{id}/toggle", async (int id, CatalogDbContext db) =>
     return Results.Ok(todo);
 });
 
-// NEU: DELETE-Endpunkt zum Löschen einer Aufgabe
+// NEU: Endpunkt für das Bearbeiten / Aktualisieren einer Aufgabe
+app.MapPut("/api/todos/{id}", async (int id, TodoItem updatedTodo, CatalogDbContext db) =>
+{
+    var todo = await db.Todos.FindAsync(id);
+    if (todo == null) return Results.NotFound();
+
+    todo.Title = updatedTodo.Title;
+    todo.Notes = updatedTodo.Notes;
+    todo.Priority = updatedTodo.Priority;
+    todo.DueDate = updatedTodo.DueDate;
+
+    await db.SaveChangesAsync();
+    return Results.Ok(todo);
+});
+
 app.MapDelete("/api/todos/{id}", async (int id, CatalogDbContext db) =>
 {
     var todo = await db.Todos.FindAsync(id);
@@ -51,7 +65,7 @@ app.MapDelete("/api/todos/{id}", async (int id, CatalogDbContext db) =>
 
     db.Todos.Remove(todo);
     await db.SaveChangesAsync();
-    return Results.NoContent(); // HTTP 204
+    return Results.NoContent();
 });
 
 app.Run();
