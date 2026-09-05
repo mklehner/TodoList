@@ -1,0 +1,36 @@
+name: .NET Core Integration (CI)
+
+# Die Pipeline startet bei jedem Push oder Pull Request auf dem "main" oder "master" Branch
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # Nutzt einen frischen Ubuntu-Server bei GitHub
+
+    steps:
+    # 1. Den Quellcode aus dem GitHub-Repository auschecken
+    - name: Code auschecken
+      uses: actions/checkout@v4
+
+    # 2. Das offizielle .NET 8 SDK auf dem GitHub-Server einrichten
+    - name: .NET Core SDK einrichten
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    # 3. Alle NuGet-Pakete für die gesamte Solution wiederherstellen
+    - name: Abhängigkeiten wiederherstellen
+      run: dotnet restore
+
+    # 4. Das gesamte Projekt (APIs, Frontend und Tests) kompilieren
+    - name: Anwendung kompilieren
+      run: dotnet build --no-restore --configuration Release
+
+    # 5. Alle automatisierten Unit-Tests ausführen
+    - name: Unit-Tests ausführen
+      run: dotnet test --no-build --configuration Release --verbosity normal
+

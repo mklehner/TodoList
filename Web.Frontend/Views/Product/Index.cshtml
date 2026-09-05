@@ -1,0 +1,81 @@
+@model IEnumerable<Web.Frontend.Models.TodoViewModel>
+
+@{
+    ViewData["Title"] = "Meine To-Do Liste";
+    // Das heutige Datum als reines Datum ohne Uhrzeit für den Vergleich
+    var heute = DateTime.Today;
+}
+
+<div class="container mt-5" style="max-width: 700px;">
+    <h2 class="text-center mb-4">📝 Meine To-Do Liste</h2>
+    
+    <!-- Formular für neue Aufgaben -->
+    <div class="card p-3 shadow-sm mb-4">
+        <form asp-action="Create" method="post" class="row g-2">
+            <div class="col-md-7">
+                <input type="text" name="title" class="form-control" placeholder="Was steht heute an?" required />
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="dueDate" class="form-control" title="Fälligkeitsdatum (optional)" />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success w-100">Plus</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Liste der To-Dos -->
+    <ul class="list-group shadow-sm">
+        @if (!Model.Any())
+        {
+            <li class="list-group-item text-center text-muted py-4">Alles erledigt! Keine offenen Aufgaben.</li>
+        }
+        @foreach (var item in Model)
+        {
+            // Logik: Ist die Aufgabe offen und das Datum liegt vor heute?
+            bool istUeberfaellig = !item.IsCompleted && item.DueDate.HasValue && item.DueDate.Value.Date < heute;
+            
+            // Dynamische CSS-Klassen für den Hintergrund und Rahmen vergeben
+            string listenKlasse = istUeberfaellig ? "list-group-item-danger border-danger" : "";
+            string badgeKlasse = istUeberfaellig ? "bg-danger animate-pulse" : "bg-secondary";
+
+            <li class="list-group-item d-flex justify-content-between align-items-center @listenKlasse" style="transition: all 0.3s ease;">
+                <div>
+                    <!-- Titel -->
+                    <span class="fw-bold" style="@(item.IsCompleted ? "text-decoration: line-through; color: gray;" : "")">
+                        @item.Title
+                    </span>
+                    
+                    <!-- Fälligkeitsdatum -->
+                    @if (item.DueDate.HasValue)
+                    {
+                        <span class="badge @badgeKlasse ms-2 text-white" style="font-size: 0.75rem;">
+                            @(istUeberfaellig ? "⚠️ Überfällig seit: " : "📅 Bis: ") @item.DueDate.Value.ToString("dd.MM.yyyy")
+                        </span>
+                    }
+                </div>
+                
+                <!-- Aktionen -->
+                <div class="d-flex gap-2">
+                    <form asp-action="Toggle" method="post" class="m-0">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        @if (item.IsCompleted)
+                        {
+                            <button type="submit" class="btn btn-sm btn-secondary">Öffnen</button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-sm btn-primary">Erledigen</button>
+                        }
+                    </form>
+
+                    <form asp-action="Delete" method="post" class="m-0" onsubmit="return confirm('Diese Aufgabe wirklich löschen?');">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger">Löschen</button>
+                    </form>
+                </div>
+            </li>
+        }
+    </ul>
+</div>
+
