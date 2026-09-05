@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -7,7 +8,6 @@ using Moq.Protected;
 using Web.Frontend.Controllers;
 using Web.Frontend.Models;
 using Xunit;
-using System.Text.Json;
 
 namespace Web.Frontend.Tests;
 
@@ -49,13 +49,49 @@ public class ProductControllerTests
 
         var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
-        // ACT
-        var result = await controller.Index(editId: null);
+        // ACT - FIX: Jetzt mit den drei erwarteten Parametern aufrufen (editId, search, priorityFilter)
+        var result = await controller.Index(editId: null, search: null, priorityFilter: null);
 
         // ASSERT
         var viewResult = Assert.IsType<ViewResult>(result);
         var model = Assert.IsAssignableFrom<IEnumerable<TodoViewModel>>(viewResult.Model);
         Assert.Empty(model);
+    }
+
+    [Fact]
+    public async Task Index_SendsCorrectQueryParameters_ToBackendApi()
+    {
+        // ARRANGEMENT
+        _handlerMock
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent("[]", Encoding.UTF8, "application/json")
+            });
+
+        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
+        string searchWord = "Bewerbung";
+        string filterPrio = "Hoch";
+
+        // ACT
+        await controller.Index(editId: null, search: searchWord, priorityFilter: filterPrio);
+
+        // ASSERT - Prüfen, ob der HTTP-Aufruf die Filter als Query-String (?search=...&priority=...) enthielt
+        _handlerMock.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req => 
+                req.Method == HttpMethod.Get && 
+                req.RequestUri!.ToString().Contains($"search={searchWord}") && 
+                req.RequestUri!.ToString().Contains($"priority={filterPrio}")),
+            ItExpr.IsAny<CancellationToken>()
+        );
     }
 
     [Fact]
@@ -73,7 +109,6 @@ public class ProductControllerTests
             )
             .Callback<HttpRequestMessage, CancellationToken>(async (req, token) =>
             {
-                // Hier lesen wir den Content sicher asynchron aus, bevor wir die Warnung auslösen
                 if (req.Content != null)
                 {
                     capturedJson = await req.Content.ReadAsStringAsync(token);
@@ -90,7 +125,6 @@ public class ProductControllerTests
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("Index", redirectResult.ActionName);
 
-        // Prüfen, ob die Werte im abgefangenen JSON vorhanden sind
         Assert.Contains("Bewerbung abschicken", capturedJson);
         Assert.Contains("Hoch", capturedJson);
 
@@ -125,7 +159,7 @@ public class ProductControllerTests
             })
             .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
 
-            var controller = new ProductController(_factoryMock.Object, _configMock.Object);
+        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
         // ACT
         var result = await controller.Edit(testId, "Titel geändert", DateTime.Today, "Neue Notiz", "Niedrig", isCompleted: false);
@@ -134,12 +168,10 @@ public class ProductControllerTests
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("Index", redirectResult.ActionName);
 
-        // NEU & UMLAUT-SICHER: Wir deserialisieren das JSON wieder in ein dynamisches Dictionary
         var deserializedTodo = JsonSerializer.Deserialize<Dictionary<string, object>>(capturedJson, 
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
         Assert.NotNull(deserializedTodo);
-        // Nun vergleichen wir den echten Textinhalt, unabhängig von der Unicode-Codierung (\u00E4)
         Assert.Equal("Titel geändert", deserializedTodo["Title"].ToString());
 
         _handlerMock.Protected().Verify(
@@ -151,7 +183,6 @@ public class ProductControllerTests
             ItExpr.IsAny<CancellationToken>()
         );
     }
-
 
     [Fact]
     public async Task Delete_SendsDeleteRequestToApi_AndRedirectsToIndex()

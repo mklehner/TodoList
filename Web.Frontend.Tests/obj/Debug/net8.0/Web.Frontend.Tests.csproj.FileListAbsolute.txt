@@ -101,10 +101,10 @@
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.AssemblyInfoInputs.cache
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.AssemblyInfo.cs
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.csproj.CoreCompileInputs.cache
+/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.sourcelink.json
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Fron.152D4D98.Up2Date
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.dll
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/refint/Web.Frontend.Tests.dll
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.pdb
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.genruntimeconfig.cache
 /home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/ref/Web.Frontend.Tests.dll
-/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend.Tests/obj/Debug/net8.0/Web.Frontend.Tests.sourcelink.json
