@@ -8,19 +8,19 @@
     "net8.0": []
   },
   "packageFolders": {
-    "/home/mlehner/.nuget/packages/": {}
+    "/root/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend/Web.Frontend.csproj",
+      "projectUniqueName": "/app/Web.Frontend.csproj",
       "projectName": "Web.Frontend",
-      "projectPath": "/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend/Web.Frontend.csproj",
-      "packagesPath": "/home/mlehner/.nuget/packages/",
-      "outputPath": "/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend/obj/",
+      "projectPath": "/app/Web.Frontend.csproj",
+      "packagesPath": "/root/.nuget/packages/",
+      "outputPath": "/app/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/mlehner/.nuget/NuGet/NuGet.Config"
+        "/root/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -67,7 +67,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/snap/dotnet-sdk/256/sdk/8.0.407/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.424/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

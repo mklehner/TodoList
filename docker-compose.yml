@@ -9,6 +9,9 @@ services:
       - POSTGRES_DB=catalog_db
     ports:
       - "5432:5432"
+    # DIESE ZWEI ZEILEN HINZUFÜGEN: Sichert die DB-Daten auf Ihrer echten Festplatte
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
   # 2. Das C# Backend (REST-API)
   catalog-api:
@@ -42,3 +45,7 @@ services:
     depends_on:
       - catalog-api
 
+# DIESEN BLOCK GANZ UNTEN HINZUFÜGEN: Definiert das dauerhafte Volume
+# HIER WAR EIN FEHLER: Dieses Element steht jetzt ganz links am Rand auf oberster Ebene!
+volumes:
+  pgdata:

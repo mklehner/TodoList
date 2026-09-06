@@ -11,7 +11,20 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddDbContext<CatalogDbContext>(options => options.UseNpgsql(connectionString));
 
+// ─── 1. SWAGGER-DIENSTE REGISTRIEREN ───────────────────────────────────
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
+
+// ─── 2. SWAGGER MIDDLEWARE AKTIVIEREN ─────────────────────────────────
+// In Docker-Containern erzwingen wir Swagger unabhängig von der Environment
+app.UseSwagger();
+app.UseSwaggerUI(c => 
+{
+    // Nutzt den Standard-Pfad für die OpenAPI-Schnittstellenbeschreibung
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Todo API v1");
+});
 
 // Erstellt die Todo-Tabelle in der DB beim Start
 using (var scope = app.Services.CreateScope())
@@ -86,6 +99,12 @@ app.MapDelete("/api/todos/{id}", async (int id, CatalogDbContext db) =>
     db.Todos.Remove(todo);
     await db.SaveChangesAsync();
     return Results.NoContent();
+});
+
+// NEU: Automatische Weiterleitung von der Startseite direkt zu Swagger
+app.MapGet("/", (HttpContext context) => {
+    context.Response.Redirect("/swagger");
+    return Task.CompletedTask;
 });
 
 app.Run();

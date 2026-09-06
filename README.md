@@ -12,8 +12,8 @@ Praxisnahes Pilotprojekt demonstriert Best Practices in den Bereichen **C# (ASP.
 
 ```text
 Richten Sie sich hierbei nach der exakten Version Ihres Betriebssystems, 
-z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) aus den Repositories von Docker.
-(Details siehe 💻 unten)
+z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) 
+aus den Repositories von Docker (Details siehe 💻 unten).
 ```
 
 * Ansonsten muss nichts installiert werden. Im Terminal einfach mit folgenden Dreizeiler die vollständige Microservice-Architektur inkl. SQL-Datenbank starten:
@@ -26,7 +26,7 @@ sudo docker compose up
 
 **Jetzt im Browser öffnen:**
 * 🖥️ **Frontend (Todo UI):** [http://localhost:5000](http://localhost:5000) – *mit augenschonenden Dark Mode.*
-* 🔍 **Backend (Swagger-Dokumentation):** [http://localhost:5001/swagger](http://localhost:5001/swagger) – *Testen Sie die REST-API live mit Swagger.*
+* ![Swagger Badge](https://shields.io) 🔍 **Backend (Swagger-Dokumentation):** [http://localhost:5001/swagger](http://localhost:5001/swagger) – *Testen Sie die REST-API live mit Swagger.*
 
 ---
 
