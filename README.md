@@ -16,7 +16,7 @@ z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Dock
 (Details siehe 💻 unten)
 ```
 
-* Ansonsten muss nichts installiert werden. Kopieren Sie einfach diesen Dreizeiler in Ihr Linux-Terminal, um die vollständige Microservice-Architektur inklusive SQL-Datenbank sofort live zu starten:
+* Ansonsten muss nichts installiert werden. Im Terminal einfach mit folgenden Dreizeiler die vollständige Microservice-Architektur inkl. SQL-Datenbank starten:
 
 ```bash
 git clone https://github.com/mklehner/TodoList.git
