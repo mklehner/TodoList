@@ -1,5 +1,4 @@
-# ☑️ Distributed Cloud-Native Todo List (.NET 8 / PostgreSQL / Docker)
-## <img src="https://iconify.design" width="16" height="16" align="center" color=%231DA1F2/> TEST
+# :whale: Distributed Cloud-Native Todo List (.NET 8 / PostgreSQL / Docker)
 
 Ein kleines Todo-Verwaltungssystem.
 Es ist als modernes, verteiltes **cloud-native Microservice-Architektur** konzipiert. 
