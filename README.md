@@ -1,4 +1,5 @@
-# 📝 Distributed Cloud-Native Todo List (.NET 8 / PostgreSQL / Docker)
+# ☑️ Distributed Cloud-Native Todo List (.NET 8 / PostgreSQL / Docker)
+## <img src="https://iconify.design" width="16" height="16" align="center" color=%231DA1F2/> TEST
 
 Ein kleines Todo-Verwaltungssystem.
 Es ist als modernes, verteiltes **cloud-native Microservice-Architektur** konzipiert. 
@@ -8,7 +9,7 @@ Das Projekt dient als praxisnahes Pilotprojekt, um Best Practices in den Bereich
 
 ## 🚀 Quickstart (Docker erleben)
 
-* Voraussetzung (Docker): Richten Sie sich beim einrichten von Docker nach der exakten Version Ihres Betriebssystems, 
+* Docker einrichten (Voraussetzung): Richten Sie sich hierbei nach der exakten Version Ihres Betriebssystems, 
 (z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) aus den Repositories von Docker. Details siehe 💻 unten).
 
 * Sie müssen ansosnten nichts auf Ihrem System installieren. Kopieren Sie einfach diesen Dreizeiler in Ihr Linux-Terminal, um die vollständige Microservice-Architektur inklusive SQL-Datenbank sofort live zu starten:
@@ -20,7 +21,7 @@ sudo docker compose up
 ```
 
 **Jetzt im Browser öffnen:**
-* 🖥️ **Frontend (To-Do UI):** [http://localhost:5000](http://localhost:5000) – *mit augenschonenden Dark Mode.*
+* 🖥️ **Frontend (Todo UI):** [http://localhost:5000](http://localhost:5000) – *mit augenschonenden Dark Mode.*
 * 🔍 **Backend (Swagger-Dokumentation):** [http://localhost:5001/swagger](http://localhost:5001/swagger) – *Testen Sie die REST-API live mit Swagger.*
 
 ---
@@ -47,13 +48,13 @@ Das System ist in lose gekoppelte, funktionale Einheiten unterteilt und läuft v
 └─────────────────────────┘
 ```
 
-1. **`Web.Frontend` (ASP.NET Core MVC):** Die Benutzeroberfläche rendert Server-seitig und kommuniziert asynchron via `HttpClient` mit dem API-Backend. Es verfügt über Inline-Editierung und Echtzeit-Validierung überfälliger Aufgaben.
+1. **`Web.Frontend` (ASP.NET Core MVC):** Die Benutzeroberfläche rendert serverseitig und kommuniziert asynchron via `HttpClient` mit dem API-Backend. Es verfügt über Inline-Editierung und Echtzeit-Validierung überfälliger Aufgaben.
 2. **`Catalog.API` (ASP.NET Core Web API):** Ein schlanker, hochperformanter Daten-Service, der auf modernsten **Minimal APIs** basiert. Er verarbeitet die Geschäftslogik und stellt die Endpunkte bereit.
 3. **`PostgreSQL` (Relational SQL DB):** Ein robuster Datenbank-Container. Die Tabellenstrukturen werden beim App-Start über Entity Framework Core automatisch und sicher initialisiert (`EnsureCreated`).
 
 ---
 
-## ✨ Key Features & Implementierungen
+## ✅ Key Features & Implementierungen
 
 *   **Inline-Bearbeitung & Priorisierung:** Aufgaben können direkt in der Listenansicht editiert werden (Titel, Notiz, Ablaufdatum). Ein dreistufiges Priorisierungssystem (`Hoch`, `Mittel`, `Niedrig`) sortiert wichtige Aufgaben automatisch nach oben.
 *   **Visuelle Dringlichkeits-Warnung:** Aufgaben, deren Fälligkeitsdatum in der Vergangenheit liegt, werden im Frontend über dynamische CSS-Klassen automatisch rot hervorgehoben.
@@ -62,7 +63,7 @@ Das System ist in lose gekoppelte, funktionale Einheiten unterteilt und läuft v
 
 ---
 
-## 🛠️ Tech Stack & Werkzeuge
+## ⚙️ Tech Stack & Werkzeuge
 
 *   **Frameworks:** .NET 8.0 (LTS) – ASP.NET Core MVC & Web API
 *   **ORM / Datenbank:** Entity Framework Core mit PostgreSQL-Provider (`Npgsql`)
