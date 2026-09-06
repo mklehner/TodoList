@@ -25,8 +25,8 @@ sudo docker compose up
 ```
 
 **Jetzt im Browser öffnen:**
-* 🖥️ **Frontend (Todo UI):** [http://localhost:5000](http://localhost:5000) – *mit augenschonenden Dark Mode.*
-* 🔍 **Backend (Swagger-Dokumentation):** [http://localhost:5001/swagger](http://localhost:5001/swagger) – *Testen Sie die REST-API live mit Swagger.*
+* 🖥️ **Frontend (Todo UI):** [http://localhost:5000](http://localhost:5000) – *im augenschonenden Dark Mode.*
+* 🔍 **Backend (Swagger-Dokumentation):** [http://localhost:5001/swagger](http://localhost:5001/swagger) – *REST-API mit Swagger Live testen.*
 
 ---
 
