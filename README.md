@@ -11,13 +11,15 @@ Praxisnahes Pilotprojekt demonstriert Best Practices in den Bereichen **C# (ASP.
 * Docker einrichten (Voraussetzung)
 
 ```text
-Richten Sie sich hierbei nach der exakten Version Ihres Betriebssystems, z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) aus den Repositories von Docker. Details siehe 💻 unten.
+Richten Sie sich hierbei nach der exakten Version Ihres Betriebssystems, 
+z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) aus den Repositories von Docker.
+(Details siehe 💻 unten)
 ```
 
 * Ansonsten muss nichts installiert werden. Kopieren Sie einfach diesen Dreizeiler in Ihr Linux-Terminal, um die vollständige Microservice-Architektur inklusive SQL-Datenbank sofort live zu starten:
 
 ```bash
-git clone https://github.com/mklehner/TodoList
+git clone https://github.com/mklehner/TodoList.git
 cd TodoList
 sudo docker compose up
 ```
@@ -92,7 +94,7 @@ Dank vollständiger Docker-Kapselung müssen keine SDKs oder Datenbanken auf Ihr
 
 ### 1. Repository klonen & Verzeichnis wechseln
 ```bash
-git clone https://github.com
+git clone https://github.com/mklehner/TodoList.git
 cd TodoList
 ```
 
