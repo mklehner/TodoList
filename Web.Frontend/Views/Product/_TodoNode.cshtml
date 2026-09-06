@@ -1,0 +1,84 @@
+@model (Web.Frontend.Models.TodoViewModel item, int depth)
+
+@{
+    var heute = DateTime.Today;
+    var item = Model.item;
+    var depth = Model.depth;
+    int? editId = ViewData["EditId"] as int?;
+
+    bool istUeberfaellig = !item.IsCompleted && item.DueDate.HasValue && item.DueDate.Value.Date < heute;
+
+    // Nutzt feine Rahmen (border) und dezente Textfarben statt knalliger Vollflächen
+    string prioBadge = item.Priority == "Hoch" ? "border border-danger text-danger bg-transparent" : item.Priority == "Mittel" 
+            ? "border border-warning text-warning bg-transparent" 
+            : "border border-secondary text-secondary bg-transparent";
+
+    string listenKlasse = istUeberfaellig ? "list-group-item-danger border-danger text-dark" : "bg-dark text-white border-secondary";
+    string einrueckungsKlasse = depth > 0 ? "tree-indent" : "";
+}
+
+<div class="@einrueckungsKlasse mt-1">
+    @if (editId.HasValue && editId.Value == item.Id)
+    {
+        <!-- 🛠️ BEARBEITUNGSMODUS -->
+        <li class="list-group-item bg-secondary p-3 border-info rounded">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" name="id" value="@item.Id" />
+                <input type="hidden" name="isCompleted" value="@item.IsCompleted.ToString().ToLower()" />
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6"><input type="text" name="title" class="form-control form-control-sm bg-dark text-white" value="@item.Title" required /></div>
+                    <div class="col-md-3"><input type="date" name="dueDate" class="form-control form-control-sm bg-dark text-white" value="@(item.DueDate?.ToString("yyyy-MM-dd"))" /></div>
+                    <div class="col-md-3">
+                        <select name="priority" class="form-select form-select-sm bg-dark text-white">
+                            <option value="Niedrig" selected="@(item.Priority == "Niedrig")">Niedrig</option>
+                            <option value="Mittel" selected="@(item.Priority == "Mittel")">Mittel</option>
+                            <option value="Hoch" selected="@(item.Priority == "Hoch")">Hoch</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <input type="text" name="notes" class="form-control form-control-sm bg-dark text-white me-2" value="@item.Notes" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-sm btn-success">Speichern</button>
+                        <a asp-action="Index" class="btn btn-sm btn-light">Abbrechen</a>
+                    </div>
+                </div>
+            </form>
+        </li>
+    }
+    else
+    {
+        <!-- 👀 ANZEIGEMODUS -->
+        <li class="list-group-item d-flex justify-content-between align-items-center @listenKlasse rounded">
+            <div>
+                <span class="badge @prioBadge me-2" style="font-size: 0.7rem;">@item.Priority</span>
+                <span class="fw-bold" style="@(item.IsCompleted ? "text-decoration: line-through; color: #888888;" : "")">@item.Title</span>
+                @if (item.DueDate.HasValue)
+                {
+                    <span class="badge @(istUeberfaellig ? "bg-danger" : "bg-secondary") ms-2">@item.DueDate.Value.ToString("dd.MM.yyyy")</span>
+                }
+                @if (!string.IsNullOrEmpty(item.Notes))
+                {
+                    <div class="small @(istUeberfaellig ? "text-dark-50" : "text-muted") mt-1">💬 @item.Notes</div>
+                }
+            </div>
+            
+            <div class="d-flex gap-1">
+                <button class="btn btn-sm btn-outline-success" onclick="let t=prompt('Name der Unteraufgabe:'); if(t){ location.href='/Product/Create?title='+encodeURIComponent(t)+'&priority=Mittel&parentId='+@item.Id; }">+</button>
+                <a asp-action="Index" asp-route-editId="@item.Id" class="btn btn-sm btn-outline-info">Edit</a>
+                <form asp-action="Toggle" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-primary">✓</button></form>
+                <form asp-action="Delete" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-secondary">X</button></form>
+            </div>
+        </li>
+    }
+
+    <!-- 🔥 REKURSION: Wenn Unteraufgaben existieren, ruft sich die Partial View selbst auf -->
+    @if (item.SubTodos != null && item.SubTodos.Any())
+    {
+        @foreach (var subItem in item.SubTodos)
+        {
+            @await Html.PartialAsync("_TodoNode", (item: subItem, depth: depth + 1))
+        }
+    }
+</div>
+

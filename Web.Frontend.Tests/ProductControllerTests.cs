@@ -49,13 +49,53 @@ public class ProductControllerTests
 
         var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
-        // ACT - FIX: Jetzt mit den drei erwarteten Parametern aufrufen (editId, search, priorityFilter)
+        // ACT - Aufruf an die neue Index-Signatur mit 3 Parametern angepasst
         var result = await controller.Index(editId: null, search: null, priorityFilter: null);
 
         // ASSERT
         var viewResult = Assert.IsType<ViewResult>(result);
         var model = Assert.IsAssignableFrom<IEnumerable<TodoViewModel>>(viewResult.Model);
         Assert.Empty(model);
+    }
+
+    [Fact]
+    public async Task Index_CorrectlyBuildsTreeStructure_FromFlatList()
+    {
+        // ARRANGEMENT: Wir simulieren eine flache Liste aus der API (1 Hauptaufgabe, 1 Unteraufgabe)
+        var flatJson = @"[
+            {""Id"": 1, ""Title"": ""Hauptaufgabe"", ""ParentId"": null, ""Priority"": ""Mittel""},
+            {""Id"": 2, ""Title"": ""Unteraufgabe"", ""ParentId"": 1, ""Priority"": ""Mittel""}
+        ]";
+
+        _handlerMock
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(flatJson, Encoding.UTF8, "application/json")
+            });
+
+        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
+
+        // ACT
+        var result = await controller.Index(editId: null, search: null, priorityFilter: null);
+
+        // ASSERT
+        var viewResult = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsAssignableFrom<IEnumerable<TodoViewModel>>(viewResult.Model).ToList();
+
+        // Es darf nur die Hauptaufgabe (Root) auf oberster Ebene zurückgegeben werden
+        Assert.Single(model); 
+        Assert.Equal(1, model.First().Id);
+
+        // Die Unteraufgabe muss hierarchisch im Speicher in die 'SubTodos'-Liste einsortiert worden sein
+        Assert.Single(model.First().SubTodos);
+        Assert.Equal(2, model.First().SubTodos.First().Id);
     }
 
     [Fact]
@@ -82,7 +122,7 @@ public class ProductControllerTests
         // ACT
         await controller.Index(editId: null, search: searchWord, priorityFilter: filterPrio);
 
-        // ASSERT - Prüfen, ob der HTTP-Aufruf die Filter als Query-String (?search=...&priority=...) enthielt
+        // ASSERT
         _handlerMock.Protected().Verify(
             "SendAsync",
             Times.Once(),
@@ -118,7 +158,7 @@ public class ProductControllerTests
 
         var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
-        // ACT
+        // ACT - Aufruf an die neue Create-Überladung angepasst
         var result = await controller.Create("Bewerbung abschicken", DateTime.Today, "C# Projekt zeigen", "Hoch");
 
         // ASSERT

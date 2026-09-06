@@ -3,25 +3,27 @@
 @{
     ViewData["Title"] = "Meine To-Do Liste";
     var heute = DateTime.Today;
-    int? editId = ViewData["EditId"] as int?;
 }
 
 <style>
     body { background-color: #121212 !important; color: #ffffff !important; }
+    .tree-indent { margin-left: 2.5rem; border-left: 2px dashed #444; padding-left: 1rem; }
 </style>
 
-<div class="container mt-5" style="max-width: 800px;">
-    <h2 class="text-center mb-4 text-muted">🛠️ Meine To-Do Liste</h2>
+<div class="container mt-5" style="max-width: 850px;">
+    <h2 class="text-center mb-4 text-muted">🛠️ Todo Liste (hierarchisch)</h2>
     
-    <!-- Formular für neue Aufgaben -->
+    <!-- Haupt-Formular für neue WURZEL-Aufgaben -->
     <div class="card p-3 shadow-sm mb-4 bg-secondary text-white border-secondary">
+        <h5>Neue Hauptaufgabe erstellen</h5>
         <form asp-action="Create" method="post">
+            <input type="hidden" name="parentId" value="" />
             <div class="row g-2 mb-2">
                 <div class="col-md-6">
-                    <input type="text" name="title" class="form-control bg-dark text-white border-secondary" placeholder="Was steht heute an?" required />
+                    <input type="text" name="title" class="form-control bg-dark text-white border-secondary" placeholder="Hauptaufgabe..." required />
                 </div>
                 <div class="col-md-3">
-                    <input type="date" name="dueDate" class="form-control bg-dark text-white border-secondary" title="Ablaufdatum" />
+                    <input type="date" name="dueDate" class="form-control bg-dark text-white border-secondary" />
                 </div>
                 <div class="col-md-3">
                     <select name="priority" class="form-select bg-dark text-white border-secondary">
@@ -33,21 +35,20 @@
             </div>
             <div class="row g-2">
                 <div class="col-md-10">
-                    <input type="text" name="notes" class="form-control bg-dark text-white border-secondary" placeholder="Details oder Notizen..." />
+                    <input type="text" name="notes" class="form-control bg-dark text-white border-secondary" placeholder="Details..." />
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-success w-100">Plus</button>
+                    <button type="submit" class="btn btn-success w-100">Erstellen</button>
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- 🔍 NEU: Such- und Filterleiste (Dark Design) -->
+    <!-- Filterleiste -->
     <div class="card p-2 shadow-sm mb-3 bg-dark border-secondary">
         <form asp-action="Index" method="get" class="row g-2 align-items-center">
             <div class="col-md-6">
-                <input type="text" name="search" class="form-control form-control-sm bg-dark text-white border-secondary" 
-                       placeholder="Aufgaben durchsuchen..." value="@ViewData["CurrentSearch"]" />
+                <input type="text" name="search" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Suchen..." value="@ViewData["CurrentSearch"]" />
             </div>
             <div class="col-md-4">
                 <select name="priorityFilter" class="form-select form-select-sm bg-dark text-white border-secondary">
@@ -58,114 +59,22 @@
                 </select>
             </div>
             <div class="col-md-2 d-flex gap-1">
-                <button type="submit" class="btn btn-sm btn-info w-100 text-darkfw-bold">Filtern</button>
-                @if (!string.IsNullOrEmpty(ViewData["CurrentSearch"]?.ToString()) || !string.IsNullOrEmpty(ViewData["CurrentPriorityFilter"]?.ToString()))
-                {
-                    <a asp-action="Index" class="btn btn-sm btn-outline-light">X</a>
-                }
+                <button type="submit" class="btn btn-sm btn-info w-100 text-dark">Filtern</button>
+                <a asp-action="Index" class="btn btn-sm btn-outline-light">X</a>
             </div>
         </form>
     </div>
 
-    <!-- Liste der To-Dos -->
+    <!-- Liste der Hauptaufgaben (ruft für jede Zeile die Partial View auf) -->
     <ul class="list-group shadow-sm border-secondary">
         @if (!Model.Any())
         {
-            <li class="list-group-item text-center text-muted py-4 bg-dark border-secondary">Alles erledigt!</li>
+            <li class="list-group-item text-center text-muted py-4 bg-dark border-secondary">Keine Aufgaben vorhanden.</li>
         }
-        @foreach (var item in Model)
+        @foreach (var rootItem in Model)
         {
-            bool istUeberfaellig = !item.IsCompleted && item.DueDate.HasValue && item.DueDate.Value.Date < heute;
-            
-            // Prioritäten-Farbe festlegen
-            string prioBadge = item.Priority == "Hoch" ? "bg-danger" : item.Priority == "Mittel" ? "bg-warning text-dark" : "bg-info text-dark";
-            string listenKlasse = istUeberfaellig ? "list-group-item-danger border-danger text-dark" : "bg-dark text-white border-secondary";
-
-            if (editId.HasValue && editId.Value == item.Id)
-            {
-                <!-- 🛠️ BEARBEITUNGS-MODUS (Zeile wechselt in Input-Felder) -->
-                <li class="list-group-item bg-secondary p-3 border-info">
-                    <form asp-action="Edit" method="post">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <input type="hidden" name="isCompleted" value="@item.IsCompleted.ToString().ToLower()" />
-                        
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-6">
-                                <input type="text" name="title" class="form-control form-control-sm bg-dark text-white" value="@item.Title" required />
-                            </div>
-                            <div class="col-md-3">
-                                <input type="date" name="dueDate" class="form-control form-control-sm bg-dark text-white" value="@(item.DueDate?.ToString("yyyy-MM-dd"))" />
-                            </div>
-                            <div class="col-md-3">
-                                <select name="priority" class="form-select form-select-sm bg-dark text-white">
-                                    <option value="Niedrig" selected="@(item.Priority == "Niedrig")">Niedrig</option>
-                                    <option value="Mittel" selected="@(item.Priority == "Mittel")">Mittel</option>
-                                    <option value="Hoch" selected="@(item.Priority == "Hoch")">Hoch</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="flex-grow-1 me-2">
-                                <input type="text" name="notes" class="form-control form-control-sm bg-dark text-white" value="@item.Notes" placeholder="Keine Notiz vorhanden" />
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-sm btn-success">Speichern</button>
-                                <!-- Suchen Sie diese Zeile im Bearbeitungsmodus und ersetzen Sie sie: -->
-                                <a asp-action="Index" asp-route-search="@ViewData["CurrentSearch"]" asp-route-priorityFilter="@ViewData["CurrentPriorityFilter"]" class="btn btn-sm btn-light">Abbrechen</a>
-                            </div>
-                        </div>
-                    </form>
-                </li>
-            }
-            else
-            {
-                <!-- 👀 ANZEIGE-MODUS (Standard) -->
-                <li class="list-group-item d-flex justify-content-between align-items-center @listenKlasse">
-                    <div>
-                        <!-- Prio Badge -->
-                        <span class="badge @prioBadge me-2" style="font-size: 0.7rem;">@item.Priority</span>
-
-                        <!-- Titel -->
-                        <span class="fw-bold" style="@(item.IsCompleted ? "text-decoration: line-through; color: #888888;" : "")">
-                            @item.Title
-                        </span>
-                        
-                        <!-- Datum -->
-                        @if (item.DueDate.HasValue)
-                        {
-                            <span class="badge @(istUeberfaellig ? "bg-danger" : "bg-secondary") ms-2 text-white" style="font-size: 0.75rem;">
-                                @(istUeberfaellig ? "⚠️ Überfällig: " : "📅 ") @item.DueDate.Value.ToString("dd.MM.yyyy")
-                            </span>
-                        }
-
-                        <!-- Notiz -->
-                        @if (!string.IsNullOrEmpty(item.Notes))
-                        {
-                            <div class="small @(istUeberfaellig ? "text-dark-50" : "text-muted") mt-1" style="font-style: italic;">
-                                💬 @item.Notes
-                            </div>
-                        }
-                    </div>
-                    
-                    <!-- Aktionen -->
-                    <div class="d-flex gap-2">
-                        <!-- Edit Button (Lädt die Seite neu und übergibt die aktuelle ID) -->
-                        <a asp-action="Index" asp-route-editId="@item.Id" class="btn btn-sm btn-outline-info">Bearbeiten</a>
-
-                        <form asp-action="Toggle" method="post" class="m-0">
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <button type="submit" class="btn btn-sm @(item.IsCompleted ? "btn-secondary" : "btn-primary")">
-                                @(item.IsCompleted ? "Öffnen" : "Erledigen")
-                            </button>
-                        </form>
-
-                        <form asp-action="Delete" method="post" class="m-0" onsubmit="return confirm('Diese Aufgabe wirklich löschen?');">
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <button type="submit" class="btn btn-sm btn-danger">Löschen</button>
-                        </form>
-                    </div>
-                </li>
-            }
+            <!-- Hier übergeben wir ein Tuple mit dem Item und dem aktuellen Einrückungslevel (0) -->
+            @await Html.PartialAsync("_TodoNode", (item: rootItem, depth: 0))
         }
     </ul>
 </div>

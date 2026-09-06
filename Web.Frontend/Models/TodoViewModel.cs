@@ -8,5 +8,9 @@ public class TodoViewModel
     public DateTime? DueDate { get; set; } // NEU
     public string? Notes { get; set; } // NEU
     public string Priority { get; set; } = "Mittel"; // NEU
+    public int? ParentId { get; set; } // NEU
+
+    // NEU: Hilfseigenschaft, um die Unteraufgaben im Speicher zu bündeln
+    public List<TodoViewModel> SubTodos { get; set; } = new();
 }
 

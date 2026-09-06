@@ -37,22 +37,19 @@ using (var scope = app.Services.CreateScope())
 // REST-Endpunkt erweitert um optionale Filter-Parameter
 app.MapGet("/api/todos", async (string? search, string? priority, CatalogDbContext db) => 
 {
-    // Wir starten mit der Grundabfrage auf die Tabelle
     var query = db.Todos.AsQueryable();
 
-    // 1. Filter: Suchtext (Groß-/Kleinschreibung ignorieren)
     if (!string.IsNullOrWhiteSpace(search))
     {
         query = query.Where(t => t.Title.ToLower().Contains(search.ToLower()));
     }
 
-    // 2. Filter: Spezifische Priorität
     if (!string.IsNullOrWhiteSpace(priority) && priority != "Alle")
     {
         query = query.Where(t => t.Priority == priority);
     }
 
-    // Sortierung anwenden und Liste zurückgeben
+    // Wir holen alle To-Dos. Die Baum-Strukturierung machen wir gleich im Frontend.
     return await query
         .OrderByDescending(t => t.Priority == "Hoch")
         .ThenByDescending(t => t.Priority == "Mittel")

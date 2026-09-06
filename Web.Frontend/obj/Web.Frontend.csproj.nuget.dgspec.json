@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/app/Web.Frontend.csproj": {}
+    "/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend/Web.Frontend.csproj": {}
   },
   "projects": {
-    "/app/Web.Frontend.csproj": {
+    "/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend/Web.Frontend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/app/Web.Frontend.csproj",
+        "projectUniqueName": "/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend/Web.Frontend.csproj",
         "projectName": "Web.Frontend",
-        "projectPath": "/app/Web.Frontend.csproj",
-        "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/app/obj/",
+        "projectPath": "/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend/Web.Frontend.csproj",
+        "packagesPath": "/home/mlehner/.nuget/packages/",
+        "outputPath": "/home/mlehner/Schreibtisch/Bewerbung/C#_Pilotprojekte/DotNetMvcRestDemo/Web.Frontend/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/root/.nuget/NuGet/NuGet.Config"
+          "/home/mlehner/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -61,7 +61,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.424/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/snap/dotnet-sdk/256/sdk/8.0.407/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

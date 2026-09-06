@@ -10,6 +10,9 @@ public class TodoItem
     // NEU: Ein optionales Feld für zusätzliche Notizen
     public string? Notes { get; set; } 
     // NEU: Priorität als String (z.B. "Hoch", "Mittel", "Niedrig")
-    public string Priority { get; set; } = "Mittel"; 
+    public string Priority { get; set; } = "Mittel";
+
+    // NEU: Selbstverweis für die Baumstruktur (Null = Hauptaufgabe)
+    public int? ParentId { get; set; }
 }
 
