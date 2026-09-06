@@ -1,20 +1,23 @@
-# :whale: Distributed Cloud-Native Todo List (.NET 8 / PostgreSQL / Docker)
+# :whale: Todo List (.NET 8 / PostgreSQL / Docker)
 
 Ein kleines Todo-Verwaltungssystem.
-Es ist als modernes, verteiltes **cloud-native Microservice-Architektur** konzipiert. 
-Das Projekt dient als praxisnahes Pilotprojekt, um Best Practices in den Bereichen **C# (ASP.NET Core)**, **Docker-Containerisierung**, **asynchrone REST-Kommunikation** und **CI/CD** zu demonstrieren.
+mit moderner, verteilter **cloud-native Microservice-Architektur**. 
+Praxisnahes Pilotprojekt demonstriert Best Practices in den Bereichen **C# (ASP.NET Core)**, **Docker-Containerisierung**, **asynchrone REST-Kommunikation** und **CI/CD**.
 
 ---
 
 ## 🚀 Quickstart (Docker erleben)
 
-* Docker einrichten (Voraussetzung): Richten Sie sich hierbei nach der exakten Version Ihres Betriebssystems, 
-(z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) aus den Repositories von Docker. Details siehe 💻 unten).
+* Docker einrichten (Voraussetzung)
 
-* Sie müssen ansosnten nichts auf Ihrem System installieren. Kopieren Sie einfach diesen Dreizeiler in Ihr Linux-Terminal, um die vollständige Microservice-Architektur inklusive SQL-Datenbank sofort live zu starten:
+```text
+Richten Sie sich hierbei nach der exakten Version Ihres Betriebssystems, z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) aus den Repositories von Docker. Details siehe 💻 unten.
+```
+
+* Ansonsten muss nichts installiert werden. Kopieren Sie einfach diesen Dreizeiler in Ihr Linux-Terminal, um die vollständige Microservice-Architektur inklusive SQL-Datenbank sofort live zu starten:
 
 ```bash
-git clone https://github.com
+git clone https://github.com/mklehner/TodoList
 cd TodoList
 sudo docker compose up
 ```
@@ -53,7 +56,7 @@ Das System ist in lose gekoppelte, funktionale Einheiten unterteilt und läuft v
 
 ---
 
-## ✅ Key Features & Implementierungen
+## ✨ Key Features & Implementierungen
 
 *   **Inline-Bearbeitung & Priorisierung:** Aufgaben können direkt in der Listenansicht editiert werden (Titel, Notiz, Ablaufdatum). Ein dreistufiges Priorisierungssystem (`Hoch`, `Mittel`, `Niedrig`) sortiert wichtige Aufgaben automatisch nach oben.
 *   **Visuelle Dringlichkeits-Warnung:** Aufgaben, deren Fälligkeitsdatum in der Vergangenheit liegt, werden im Frontend über dynamische CSS-Klassen automatisch rot hervorgehoben.
