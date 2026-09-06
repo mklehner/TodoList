@@ -26,7 +26,7 @@ sudo docker compose up
 
 **Jetzt im Browser öffnen:**
 * 🖥️ **Frontend (Todo UI):** [http://localhost:5000](http://localhost:5000) – *mit augenschonenden Dark Mode.*
-* ![Swagger](https://shields.io) 🔍 **Backend (Swagger-Dokumentation):** [http://localhost:5001/swagger](http://localhost:5001/swagger) – *Testen Sie die REST-API live mit Swagger.*
+* ![Swagger](https://shields.io/swagger/valid/3.0) 🔍 **Backend (Swagger-Dokumentation):** [http://localhost:5001/swagger](http://localhost:5001/swagger) – *Testen Sie die REST-API live mit Swagger.*
 
 ---
 
