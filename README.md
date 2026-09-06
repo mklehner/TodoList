@@ -1,17 +1,17 @@
-# 📝 Distributed Cloud-Native To-Do List (.NET 8 / PostgreSQL / Docker)
+# 📝 Distributed Cloud-Native Todo List (.NET 8 / PostgreSQL / Docker)
 
-Dieses Repository enthält ein modernes, verteiltes Todo-Verwaltungssystem, das als **cloud-native Microservice-Architektur** konzipiert wurde. 
+Ein kleines Todo-Verwaltungssystem.
+Es ist als modernes, verteiltes **cloud-native Microservice-Architektur** konzipiert. 
 Das Projekt dient als praxisnahes Pilotprojekt, um Best Practices in den Bereichen **C# (ASP.NET Core)**, **Docker-Containerisierung**, **asynchrone REST-Kommunikation** und **CI/CD** zu demonstrieren.
 
 ---
-## ⚡ Voraussetzung (Docker)
-*   Richten Sie sich beim einrichten von Docker nach der exakten Version Ihres Betriebssystems, 
-    z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) aus den Repositories von Docker.
-    Details siehe unten.
 
-## ⚡ 30-Sekunden-Quickstart (Docker erleben)
+## 🚀 Quickstart (Docker erleben)
 
-Sie müssen nichts auf Ihrem System installieren. Kopieren Sie einfach diesen Dreizeiler in Ihr Linux-Terminal, um die vollständige Microservice-Architektur inklusive SQL-Datenbank sofort live zu starten:
+* Voraussetzung (Docker): Richten Sie sich beim einrichten von Docker nach der exakten Version Ihres Betriebssystems, 
+(z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) aus den Repositories von Docker. Details siehe 💻 unten).
+
+* Sie müssen ansosnten nichts auf Ihrem System installieren. Kopieren Sie einfach diesen Dreizeiler in Ihr Linux-Terminal, um die vollständige Microservice-Architektur inklusive SQL-Datenbank sofort live zu starten:
 
 ```bash
 git clone https://github.com
@@ -25,7 +25,7 @@ sudo docker compose up
 
 ---
 
-## 🚀 Architektur-Überblick
+## 🕸️ Architektur-Überblick
 
 Das System ist in lose gekoppelte, funktionale Einheiten unterteilt und läuft vollständig isoliert innerhalb eines Docker-Netzwerks:
 
@@ -80,9 +80,12 @@ Dank vollständiger Docker-Kapselung müssen keine SDKs oder Datenbanken auf Ihr
 *   Installiertes **Docker** und **Docker Compose**
 *   Ein Terminal mit Root- oder Docker-Rechten
 *   Richten Sie sich beim einrichten von Docker nach der exakten Version Ihres Betriebssystems, 
-    [z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) aus den Repositories von Docker]
+    (z.B. für Linux Mint 21.2 Victoria die offizielle Docker Community Edition (Docker CE) aus den Docker Repositories)
 *   Anschließend Neuanmeldung (oder System Neustart)
-*   Prüfen Sie nach der Neuanmeldung mit folgendem Bash Befehl, ob Docker funktioniert: 'docker run hello-world'
+*   Prüfen Sie nach der Neuanmeldung mit folgendem Befehl, ob Docker funktioniert: 
+```bash
+'docker run hello-world'
+```
 
 ### 1. Repository klonen & Verzeichnis wechseln
 ```bash
