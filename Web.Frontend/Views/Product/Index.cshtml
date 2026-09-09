@@ -71,7 +71,7 @@
         {
             <li class="list-group-item text-center text-muted py-4 bg-dark border-secondary">Keine Aufgaben vorhanden.</li>
         }
-        @foreach (var rootItem in Model)
+        @foreach (var rootItem in Model.OrderBy(t => t.BatchId))
         {
             <!-- Hier übergeben wir ein Tuple mit dem Item und dem aktuellen Einrückungslevel (0) -->
             @await Html.PartialAsync("_TodoNode", (item: rootItem, depth: 0))

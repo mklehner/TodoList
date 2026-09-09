@@ -14,5 +14,8 @@ public class TodoItem
 
     // NEU: Selbstverweis für die Baumstruktur (Null = Hauptaufgabe)
     public int? ParentId { get; set; }
+
+    // 🔴 Das neue Feld für PostgreSQL
+    public int BatchId { get; set; } 
 }
 

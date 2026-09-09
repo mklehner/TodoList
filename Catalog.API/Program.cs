@@ -30,12 +30,12 @@ app.UseSwaggerUI(c =>
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-    db.Database.EnsureCreated();
+    db.Database.Migrate(); // <-- Geändert von EnsureCreated() zu Migrate()
 }
 
 // REST-Endpunkte für die To-Do-Liste
 // REST-Endpunkt erweitert um optionale Filter-Parameter
-app.MapGet("/api/todos", async (string? search, string? priority, CatalogDbContext db) => 
+app.MapGet("/api/todos", async (string? search, string? priority, int? batchId, CatalogDbContext db) => 
 {
     var query = db.Todos.AsQueryable();
 
@@ -47,6 +47,11 @@ app.MapGet("/api/todos", async (string? search, string? priority, CatalogDbConte
     if (!string.IsNullOrWhiteSpace(priority) && priority != "Alle")
     {
         query = query.Where(t => t.Priority == priority);
+    }
+
+    if (batchId.HasValue)
+    {
+        query = query.Where(t => t.BatchId == batchId.Value);
     }
 
     // Wir holen alle To-Dos. Die Baum-Strukturierung machen wir gleich im Frontend.
@@ -83,6 +88,7 @@ app.MapPut("/api/todos/{id}", async (int id, TodoItem updatedTodo, CatalogDbCont
     todo.Notes = updatedTodo.Notes;
     todo.Priority = updatedTodo.Priority;
     todo.DueDate = updatedTodo.DueDate;
+    todo.BatchId = updatedTodo.BatchId;
 
     await db.SaveChangesAsync();
     return Results.Ok(todo);

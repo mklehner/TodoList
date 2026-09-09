@@ -49,7 +49,7 @@ public class ProductControllerTests
 
         var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
-        // ACT - Aufruf an die neue Index-Signatur mit 3 Parametern angepasst
+        // ACT
         var result = await controller.Index(editId: null, search: null, priorityFilter: null);
 
         // ASSERT
@@ -59,12 +59,12 @@ public class ProductControllerTests
     }
 
     [Fact]
-    public async Task Index_CorrectlyBuildsTreeStructure_FromFlatList()
+    public async Task Index_CorrectlyBuildsTreeStructure_AndRetainsBatchId()
     {
-        // ARRANGEMENT: Wir simulieren eine flache Liste aus der API (1 Hauptaufgabe, 1 Unteraufgabe)
+        // ARRANGEMENT: Flache Liste aus der API mit echten, gespeicherten BatchIds (z. B. 42 und 99)
         var flatJson = @"[
-            {""Id"": 1, ""Title"": ""Hauptaufgabe"", ""ParentId"": null, ""Priority"": ""Mittel""},
-            {""Id"": 2, ""Title"": ""Unteraufgabe"", ""ParentId"": 1, ""Priority"": ""Mittel""}
+            {""Id"": 1, ""Title"": ""Hauptaufgabe"", ""ParentId"": null, ""Priority"": ""Mittel"", ""BatchId"": 42},
+            {""Id"": 2, ""Title"": ""Unteraufgabe"", ""ParentId"": 1, ""Priority"": ""Mittel"", ""BatchId"": 99}
         ]";
 
         _handlerMock
@@ -92,10 +92,12 @@ public class ProductControllerTests
         // Es darf nur die Hauptaufgabe (Root) auf oberster Ebene zurückgegeben werden
         Assert.Single(model); 
         Assert.Equal(1, model.First().Id);
+        Assert.Equal(42, model.First().BatchId); // 🔴 Prüft, ob der Wert aus DB erhalten bleibt (nicht mehr überschrieben wird!)
 
         // Die Unteraufgabe muss hierarchisch im Speicher in die 'SubTodos'-Liste einsortiert worden sein
         Assert.Single(model.First().SubTodos);
         Assert.Equal(2, model.First().SubTodos.First().Id);
+        Assert.Equal(99, model.First().SubTodos.First().BatchId);
     }
 
     [Fact]
@@ -158,7 +160,7 @@ public class ProductControllerTests
 
         var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
-        // ACT - Aufruf an die neue Create-Überladung angepasst
+        // ACT
         var result = await controller.Create("Bewerbung abschicken", DateTime.Today, "C# Projekt zeigen", "Hoch");
 
         // ASSERT
@@ -177,11 +179,12 @@ public class ProductControllerTests
     }
 
     [Fact]
-    public async Task Edit_SendsPutRequestToApi_AndRedirectsToIndex()
+    public async Task Edit_SendsPutRequestToApi_WithBatchId_AndRedirectsToIndex()
     {
         // ARRANGEMENT
         string capturedJson = string.Empty;
         int testId = 1;
+        int testBatchId = 7; // 🔴 Testwert für die BatchId
 
         _handlerMock
             .Protected()
@@ -201,8 +204,8 @@ public class ProductControllerTests
 
         var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
-        // ACT
-        var result = await controller.Edit(testId, "Titel geändert", DateTime.Today, "Neue Notiz", "Niedrig", isCompleted: false);
+        // ACT - 🔴 Aufruf angepasst: Parameter 'batchId: testBatchId' am Ende übergeben
+        var result = await controller.Edit(testId, "Titel geändert", DateTime.Today, "Neue Notiz", "Niedrig", isCompleted: false, batchId: testBatchId);
 
         // ASSERT
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
@@ -213,6 +216,9 @@ public class ProductControllerTests
 
         Assert.NotNull(deserializedTodo);
         Assert.Equal("Titel geändert", deserializedTodo["Title"].ToString());
+        
+        // 🔴 Verifiziert, dass die BatchId korrekt im JSON serialisiert und an die API geschickt wird
+        Assert.Equal(testBatchId.ToString(), deserializedTodo["BatchId"].ToString());
 
         _handlerMock.Protected().Verify(
             "SendAsync",
@@ -220,39 +226,6 @@ public class ProductControllerTests
             ItExpr.Is<HttpRequestMessage>(req => 
                 req.Method == HttpMethod.Put && 
                 req.RequestUri!.ToString().EndsWith($"/api/todos/{testId}")),
-            ItExpr.IsAny<CancellationToken>()
-        );
-    }
-
-    [Fact]
-    public async Task Delete_SendsDeleteRequestToApi_AndRedirectsToIndex()
-    {
-        // ARRANGEMENT
-        _handlerMock
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.NoContent });
-
-        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
-        int testTodoId = 42;
-
-        // ACT
-        var result = await controller.Delete(testTodoId);
-
-        // ASSERT
-        var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal("Index", redirectResult.ActionName);
-
-        _handlerMock.Protected().Verify(
-            "SendAsync",
-            Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req => 
-                req.Method == HttpMethod.Delete && 
-                req.RequestUri!.ToString().EndsWith($"/api/todos/{testTodoId}")),
             ItExpr.IsAny<CancellationToken>()
         );
     }

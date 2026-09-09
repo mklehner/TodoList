@@ -9,7 +9,9 @@ public class TodoViewModel
     public string? Notes { get; set; } // NEU
     public string Priority { get; set; } = "Mittel"; // NEU
     public int? ParentId { get; set; } // NEU
-
+    
+    // 🔴 NEU: Die laufende Nummer für die Sortierung
+    public int BatchId { get; set; } 
     // NEU: Hilfseigenschaft, um die Unteraufgaben im Speicher zu bündeln
     public List<TodoViewModel> SubTodos { get; set; } = new();
 }

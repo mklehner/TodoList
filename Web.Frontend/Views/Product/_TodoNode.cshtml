@@ -1,4 +1,5 @@
-@model (Web.Frontend.Models.TodoViewModel item, int depth)
+@using Web.Frontend.Models
+@model (TodoViewModel item, int depth)
 
 @{
     var heute = DateTime.Today;
@@ -8,77 +9,175 @@
 
     bool istUeberfaellig = !item.IsCompleted && item.DueDate.HasValue && item.DueDate.Value.Date < heute;
 
-    // Nutzt feine Rahmen (border) und dezente Textfarben statt knalliger Vollflächen
     string prioBadge = item.Priority == "Hoch" ? "border border-danger text-danger bg-transparent" : item.Priority == "Mittel" 
             ? "border border-warning text-warning bg-transparent" 
             : "border border-secondary text-secondary bg-transparent";
 
-    string listenKlasse = istUeberfaellig ? "list-group-item-danger border-danger text-dark" : "bg-dark text-white border-secondary";
-    string einrueckungsKlasse = depth > 0 ? "tree-indent" : "";
+    string listenKlasse = istUeberfaellig ? "bg-danger bg-opacity-25 text-white border-danger" : "bg-dark text-white border-secondary";
+    
+    bool hatKinder = item.SubTodos != null && item.SubTodos.Any();
+    bool istImEditModus = editId.HasValue && editId.Value == item.Id;
 }
 
-<div class="@einrueckungsKlasse mt-1">
-    @if (editId.HasValue && editId.Value == item.Id)
+<style>
+    .todo-node-container {
+        /* 🔴 Die Breite des Aufklapp-Buttons (+/-) */
+        --toggle-width: 2rem;
+        display: block;
+        width: 100%;
+        position: relative;
+    }
+
+    summary.todo-summary, .todo-flat-item {
+        display: block;
+        outline: none;
+        position: relative;
+        padding-left: var(--toggle-width) !important;
+    }
+    
+    summary.todo-summary {
+        cursor: pointer;
+    }
+
+    summary.todo-summary::marker,
+    summary.todo-summary::-webkit-details-marker {
+        display: none !important;
+    }
+
+    /* Die Quadratische Box skaliert nun relativ mit (em) */
+    summary.todo-summary::before, .todo-flat-item::before {
+        content: "+";
+        position: absolute;
+        left: 0.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.15em;
+        height: 1.15em;
+        border: 2px solid #6c757d;
+        border-radius: 0.25rem;
+        background-color: #2b3035;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+        font-weight: bold;
+        font-size: 0.85em;
+        font-family: monospace;
+        line-height: 1;
+        transition: all 0.15s ease-in-out;
+    }
+
+    /* Standard-Inhalt für Eltern (wird beim Öffnen zu Minus) */
+    summary.todo-summary::before {
+        content: "+";
+    }
+
+    /* 🔴 Fester Inhalt für kinderlose Items */
+    .todo-flat-item::before {
+        content: "x";
+    }
+
+    summary.todo-summary:hover::before {
+        border-color: #f8f9fa;
+        color: #f8f9fa;
+        background-color: #343a40;
+    }
+
+    details[open] > summary.todo-summary::before {
+        content: "−";
+        border-color: #495057;
+        color: #6c757d;        
+    }
+    
+    /* 🔴 Hier steuern wir nun das Einrücken der Unterelemente */
+    .todo-sub-items {
+        padding-left: 3.0rem; //var(--toggle-width);
+        position: relative;
+        width: 100%;
+    }
+
+    /* Die gestrichelte Führungslinie orientiert sich an der CSS-Variable */
+    .todo-sub-items::before {
+        content: "";
+        position: absolute;
+        left: 2rem; //calc(var(--toggle-width) / 2.5);
+        top: 0;
+        bottom: 14px;
+        border-left: 2px dashed #495057;
+    }
+</style>
+
+<div class="todo-node-container mt-1">
+    @if (hatKinder)
     {
-        <!-- 🛠️ BEARBEITUNGSMODUS -->
-        <li class="list-group-item bg-secondary p-3 border-info rounded">
-            <form asp-action="Edit" method="post">
-                <input type="hidden" name="id" value="@item.Id" />
-                <input type="hidden" name="isCompleted" value="@item.IsCompleted.ToString().ToLower()" />
-                <div class="row g-2 mb-2">
-                    <div class="col-md-6"><input type="text" name="title" class="form-control form-control-sm bg-dark text-white" value="@item.Title" required /></div>
-                    <div class="col-md-3"><input type="date" name="dueDate" class="form-control form-control-sm bg-dark text-white" value="@(item.DueDate?.ToString("yyyy-MM-dd"))" /></div>
-                    <div class="col-md-3">
-                        <select name="priority" class="form-select form-select-sm bg-dark text-white">
-                            <option value="Niedrig" selected="@(item.Priority == "Niedrig")">Niedrig</option>
-                            <option value="Mittel" selected="@(item.Priority == "Mittel")">Mittel</option>
-                            <option value="Hoch" selected="@(item.Priority == "Hoch")">Hoch</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <input type="text" name="notes" class="form-control form-control-sm bg-dark text-white me-2" value="@item.Notes" />
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-sm btn-success">Speichern</button>
-                        <a asp-action="Index" class="btn btn-sm btn-light">Abbrechen</a>
-                    </div>
-                </div>
-            </form>
-        </li>
+        @* 🔴 WICHTIG: data-todo-id hinzugefügt und id="details-..." für den localStorage-Key *@
+        <details class="w-100 m-0 p-0 todo-details-node" id="details-@item.Id" data-todo-id="@item.Id">
+            @if (istImEditModus)
+            {
+                <summary class="todo-summary p-0 m-0">
+                    @await Html.PartialAsync("_TodoEditForm", item)
+                </summary>
+            }
+            else
+            {
+                <summary class="todo-summary m-0 p-0">
+                    @await Html.PartialAsync("_TodoDisplayItem", Tuple.Create(item, listenKlasse, prioBadge, hatKinder, depth))
+                </summary>
+            }
+
+            <div class="todo-sub-items">
+                @foreach (var subItem in item.SubTodos!.OrderBy(s => s.BatchId))
+                {
+                    @await Html.PartialAsync("_TodoNode", (item: subItem, depth: depth + 1))
+                }
+            </div>
+        </details>
     }
     else
     {
-        <!-- 👀 ANZEIGEMODUS -->
-        <li class="list-group-item d-flex justify-content-between align-items-center @listenKlasse rounded">
-            <div>
-                <span class="badge @prioBadge me-2" style="font-size: 0.7rem;">@item.Priority</span>
-                <span class="fw-bold" style="@(item.IsCompleted ? "text-decoration: line-through; color: #888888;" : "")">@item.Title</span>
-                @if (item.DueDate.HasValue)
-                {
-                    <span class="badge @(istUeberfaellig ? "bg-danger" : "bg-secondary") ms-2">@item.DueDate.Value.ToString("dd.MM.yyyy")</span>
-                }
-                @if (!string.IsNullOrEmpty(item.Notes))
-                {
-                    <div class="small @(istUeberfaellig ? "text-dark-50" : "text-muted") mt-1">💬 @item.Notes</div>
-                }
-            </div>
-            
-            <div class="d-flex gap-1">
-                <button class="btn btn-sm btn-outline-success" onclick="let t=prompt('Name der Unteraufgabe:'); if(t){ location.href='/Product/Create?title='+encodeURIComponent(t)+'&priority=Mittel&parentId='+@item.Id; }">+</button>
-                <a asp-action="Index" asp-route-editId="@item.Id" class="btn btn-sm btn-outline-info">Edit</a>
-                <form asp-action="Toggle" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-primary">✓</button></form>
-                <form asp-action="Delete" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-secondary">X</button></form>
-            </div>
-        </li>
-    }
-
-    <!-- 🔥 REKURSION: Wenn Unteraufgaben existieren, ruft sich die Partial View selbst auf -->
-    @if (item.SubTodos != null && item.SubTodos.Any())
-    {
-        @foreach (var subItem in item.SubTodos)
-        {
-            @await Html.PartialAsync("_TodoNode", (item: subItem, depth: depth + 1))
-        }
+        /* 🔴 Wir packen das Element ohne Kinder in einen CSS-Klasse-Container */
+        <div class="todo-flat-item">
+            @if (istImEditModus)
+            {
+                @await Html.PartialAsync("_TodoEditForm", item)
+            }
+            else
+            {
+                @await Html.PartialAsync("_TodoDisplayItem", Tuple.Create(item, listenKlasse, prioBadge, hatKinder, depth))
+            }
+        </div>
     }
 </div>
+
+<script>
+    // Verhindert, dass das Skript mehrfach registriert wird, falls die Node rekursiv geladen wird
+    if (typeof window.todoScriptLoaded === 'undefined') {
+        window.todoScriptLoaded = true;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // 1. Zustand beim Laden der Seite für alle Klapp-Elemente wiederherstellen
+            document.querySelectorAll('.todo-details-node').forEach(details => {
+                const todoId = details.getAttribute('data-todo-id');
+                const savedState = localStorage.getItem('todo_open_' + todoId);
+
+                if (savedState !== null) {
+                    if (savedState === 'true') {
+                        details.setAttribute('open', '');
+                    } else {
+                        details.removeAttribute('open');
+                    }
+                } else {
+                    // Standardmäßig offen, wenn noch nichts im Speicher liegt
+                    details.setAttribute('open', '');
+                }
+
+                // 2. Klicks abfangen und den aktuellen Zustand (true/false) speichern
+                details.addEventListener('toggle', function () {
+                    localStorage.setItem('todo_open_' + todoId, details.open);
+                });
+            });
+        });
+    }
+</script>
+
 

@@ -1,0 +1,11 @@
+# .NET Build-Verzeichnisse ignorieren
+**/bin/
+**/obj/
+
+# Lokale Benutzer-Konfigurationen ignorieren
+.vs/
+.vscode/
+
+# Deine generierte SQL-Datei (gehört meist nicht ins Haupt-Repository)
+**/upgrade.sql
+

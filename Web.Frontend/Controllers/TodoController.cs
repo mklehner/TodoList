@@ -79,9 +79,9 @@ public class ProductController : Controller
 
     // POST: /Product/Edit (Aufgabe aktualisieren)
     [HttpPost]
-    public async Task<IActionResult> Edit(int id, string title, DateTime? dueDate, string? notes, string priority, bool isCompleted)
+    public async Task<IActionResult> Edit(int id, string title, DateTime? dueDate, string? notes, string priority, bool isCompleted, int batchId)
     {
-        var updatedTodo = new { Id = id, Title = title, IsCompleted = isCompleted, DueDate = dueDate, Notes = notes, Priority = priority };
+        var updatedTodo = new { Id = id, Title = title, IsCompleted = isCompleted, DueDate = dueDate, Notes = notes, Priority = priority, BatchId = batchId };
         var content = new StringContent(JsonSerializer.Serialize(updatedTodo), Encoding.UTF8, "application/json");
 
         await _httpClient.PutAsync($"/api/todos/{id}", content);
