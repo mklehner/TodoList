@@ -1,4 +1,4 @@
-# :whale: Todo List (.NET 8 / PostgreSQL / Docker)
+# :whale: Todo List (C# .NET 8 / PostgreSQL / Docker)
 
 Ein kleines Todo-Verwaltungssystem.
 mit moderner, verteilter **cloud-native Microservice-Architektur**. 
