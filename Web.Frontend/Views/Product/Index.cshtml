@@ -1,7 +1,7 @@
 @model IEnumerable<Web.Frontend.Models.TodoViewModel>
 
 @{
-    ViewData["Title"] = "Meine To-Do Liste";
+    ViewData["Title"] = "🛠️ Todo Liste (hierarchisch)";
     var heute = DateTime.Today;
 }
 
@@ -10,11 +10,11 @@
     .tree-indent { margin-left: 2.5rem; border-left: 2px dashed #444; padding-left: 1rem; }
 </style>
 
-<div class="container mt-5" style="max-width: 850px;">
-    <h2 class="text-center mb-4 text-muted">🛠️ Todo Liste (hierarchisch)</h2>
+<div class="container mt-3" style="max-width: 850px;">
+    <!-- H4 TITEL WURDE ENTFERNT, DA ER JETZT IN DER NAVBAR IST -->
     
     <!-- Haupt-Formular für neue WURZEL-Aufgaben -->
-    <div class="card p-3 shadow-sm mb-4 bg-secondary text-white border-secondary">
+    <div class="card p-3 shadow-sm mb-3 bg-secondary text-white border-secondary">
         <h5>Neue Hauptaufgabe erstellen</h5>
         <form asp-action="Create" method="post">
             <input type="hidden" name="parentId" value="" />
@@ -45,7 +45,7 @@
     </div>
 
     <!-- Filterleiste -->
-    <div class="card p-2 shadow-sm mb-3 bg-dark border-secondary">
+    <div class="card p-2 shadow-sm mb-2 bg-dark border-secondary">
         <form asp-action="Index" method="get" class="row g-2 align-items-center">
             <div class="col-md-6">
                 <input type="text" name="search" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Suchen..." value="@ViewData["CurrentSearch"]" />

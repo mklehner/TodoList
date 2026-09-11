@@ -11,7 +11,11 @@ public class TodoViewModel
     public int? ParentId { get; set; } // NEU
     
     // 🔴 NEU: Die laufende Nummer für die Sortierung
-    public int BatchId { get; set; } 
+    public int BatchId { get; set; }
+
+    // 🔴 Das neue Feld für Description
+    public string? Description { get; set; } 
+
     // NEU: Hilfseigenschaft, um die Unteraufgaben im Speicher zu bündeln
     public List<TodoViewModel> SubTodos { get; set; } = new();
 }

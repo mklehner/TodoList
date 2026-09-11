@@ -17,5 +17,8 @@ public class TodoItem
 
     // 🔴 Das neue Feld für PostgreSQL
     public int BatchId { get; set; } 
+
+    // 🔴 Das neue Feld für PostgreSQL
+    public string? Description { get; set; } 
 }
 

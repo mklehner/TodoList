@@ -30,6 +30,10 @@ app.UseSwaggerUI(c =>
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+
+    // DIESE ZEILE HINZUFÜGEN: Gibt das komplette SQL-Skript im Docker-Log aus!
+    Console.WriteLine(db.Database.GenerateCreateScript());
+
     db.Database.Migrate(); // <-- Geändert von EnsureCreated() zu Migrate()
 }
 
@@ -89,6 +93,7 @@ app.MapPut("/api/todos/{id}", async (int id, TodoItem updatedTodo, CatalogDbCont
     todo.Priority = updatedTodo.Priority;
     todo.DueDate = updatedTodo.DueDate;
     todo.BatchId = updatedTodo.BatchId;
+    todo.Description = updatedTodo.Description;
 
     await db.SaveChangesAsync();
     return Results.Ok(todo);

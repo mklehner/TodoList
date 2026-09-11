@@ -1,16 +1,25 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Web.Frontend</title>
+
+    <!-- Diese Zeile für das Favicon hinzufügen -->
+    <!-- link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" / -->
+    <!-- Deaktiviert das Favicon komplett -->
+    <link rel="icon" href="data:;base64,=" />
+    <!-- Nutzt das Emoji als echtes SVG-Favicon für alle modernen Browser -->
+    <!--link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://w3.org viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>"-->
+
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Web.Frontend.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom border-secondary box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom border-secondary box-shadow mb-2">
             <div class="container-fluid">
                 <a class="navbar-brand text-muted fw-bold" asp-area="" asp-controller="Product" asp-action="Index">Web.Frontend</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -20,13 +29,21 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-muted" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-muted" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
                 </div>
+
+                <!-- Absolute Zentrierung des dynamischen Titels (nur auf großen Bildschirmen perfekt mittig) -->
+                @if (ViewData["Title"] != null)
+                {
+                    <div class="position-absolute start-50 translate-middle-x d-none d-sm-block text-muted fw-bold h5 mb-0">
+                        @ViewData["Title"]
+                    </div>
+                }
             </div>
         </nav>
     </header>
