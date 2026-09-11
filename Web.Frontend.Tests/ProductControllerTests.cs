@@ -185,6 +185,7 @@ public class ProductControllerTests
         string capturedJson = string.Empty;
         int testId = 1;
         int testBatchId = 7; // 🔴 Testwert für die BatchId
+        string testDescription = "Test"; // 🔴 Testwert für die Description
 
         _handlerMock
             .Protected()
@@ -205,7 +206,7 @@ public class ProductControllerTests
         var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
         // ACT - 🔴 Aufruf angepasst: Parameter 'batchId: testBatchId' am Ende übergeben
-        var result = await controller.Edit(testId, "Titel geändert", DateTime.Today, "Neue Notiz", "Niedrig", isCompleted: false, batchId: testBatchId);
+        var result = await controller.Edit(testId, "Titel geändert", DateTime.Today, "Neue Notiz", "Niedrig", isCompleted: false, batchId: testBatchId, description: testDescription);
 
         // ASSERT
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
