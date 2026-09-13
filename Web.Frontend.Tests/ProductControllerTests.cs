@@ -206,7 +206,7 @@ public class ProductControllerTests
         var controller = new ProductController(_factoryMock.Object, _configMock.Object);
 
         // ACT - 🔴 Aufruf angepasst: Parameter 'batchId: testBatchId' am Ende übergeben
-        var result = await controller.Edit(testId, "Titel geändert", DateTime.Today, "Neue Notiz", "Niedrig", isCompleted: false, batchId: testBatchId, description: testDescription);
+        var result = await controller.Edit(testId, "Titel geändert", DateTime.Today, "Neue Notiz", "Niedrig", isCompleted: false, batchId: testBatchId, description: testDescription, DateTime.Now, DateTime.Now);
 
         // ASSERT
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);

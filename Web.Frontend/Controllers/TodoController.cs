@@ -70,7 +70,13 @@ public class ProductController : Controller
     // Hilfsmethode, die von beiden Endpunkten genutzt wird
     private async Task<IActionResult> CreatePostInternal(string title, DateTime? dueDate, string? notes, string priority, int? parentId)
     {
-        var newTodo = new { Title = title, IsCompleted = false, DueDate = dueDate, Notes = notes, Priority = priority, ParentId = parentId };
+        // Holt die aktuelle deutsche Uhrzeit (inkl. automatischer Sommer-/Winterzeit)
+        var zoneDe = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
+        var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zoneDe); //DateTime.Now;
+        DateTime? lastChangeDate = null;  //localNow; 
+        DateTime? createdDate = localNow;
+
+        var newTodo = new { Title = title, IsCompleted = false, DueDate = dueDate, Notes = notes, Priority = priority, ParentId = parentId, CreatedDate = createdDate, LastChangeDate = lastChangeDate };
         var content = new StringContent(JsonSerializer.Serialize(newTodo), Encoding.UTF8, "application/json");
 
         await _httpClient.PostAsync("/api/todos", content);
@@ -79,9 +85,32 @@ public class ProductController : Controller
 
     // POST: /Product/Edit (Aufgabe aktualisieren)
     [HttpPost]
-    public async Task<IActionResult> Edit(int id, string title, DateTime? dueDate, string? notes, string priority, bool isCompleted, int batchId, string? description)
+    public async Task<IActionResult> Edit(int id, string title, DateTime? dueDate, string? notes, string priority, bool isCompleted, int batchId, string? description, DateTime? createdDate, DateTime? lastChangeDate)
     {
-        var updatedTodo = new { Id = id, Title = title, IsCompleted = isCompleted, DueDate = dueDate, Notes = notes, Priority = priority, BatchId = batchId, Description = description };
+        //var existingTodo = await _context.Todos.FindAsync(id);
+        //var existingTodo = await db.Todos.FindAsync(id);
+        
+        // Holt die aktuelle deutsche Uhrzeit (inkl. automatischer Sommer-/Winterzeit)
+        var zoneDe = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
+        var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zoneDe);
+
+        lastChangeDate = localNow; //DateTime.Now;
+        
+        // if (! createdDate.HasValue)
+        //      createdDate = localNow;
+
+        var updatedTodo = new { 
+            Id = id, 
+            Title = title, 
+            IsCompleted = isCompleted, 
+            DueDate = dueDate, 
+            Notes = notes, 
+            Priority = priority, 
+            BatchId = batchId, 
+            Description = description, 
+            //CreatedDate = createdDate,       // ist hier anscheinend immer null, weil das daeum in der Oberfläche nicht bearbeitet werden kann?
+            LastChangeDate = lastChangeDate};
+
         var content = new StringContent(JsonSerializer.Serialize(updatedTodo), Encoding.UTF8, "application/json");
 
         await _httpClient.PutAsync($"/api/todos/{id}", content);

@@ -78,11 +78,22 @@ app.MapPut("/api/todos/{id}/toggle", async (int id, CatalogDbContext db) =>
     if (todo == null) return Results.NotFound();
     
     todo.IsCompleted = !todo.IsCompleted;
+
+    // das anhaken wirkt wie eine Änderung
+    // Holt die aktuelle deutsche Uhrzeit (inkl. automatischer Sommer-/Winterzeit)
+    var zoneDe = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
+    var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zoneDe); //DateTime.Now;
+    DateTime? lastChangeDate = localNow;
+
+    todo.LastChangeDate = lastChangeDate;
+
     await db.SaveChangesAsync();
     return Results.Ok(todo);
 });
 
 // NEU: Endpunkt für das Bearbeiten / Aktualisieren einer Aufgabe
+// übrigens: MapPut ist "MinimalAPI" Minimal APIs erlauben es, 
+// den CatalogDbContext db direkt als Parameter in die Methode zu injizieren.
 app.MapPut("/api/todos/{id}", async (int id, TodoItem updatedTodo, CatalogDbContext db) =>
 {
     var todo = await db.Todos.FindAsync(id);
@@ -94,7 +105,12 @@ app.MapPut("/api/todos/{id}", async (int id, TodoItem updatedTodo, CatalogDbCont
     todo.DueDate = updatedTodo.DueDate;
     todo.BatchId = updatedTodo.BatchId;
     todo.Description = updatedTodo.Description;
+    
+    if (!todo.CreatedDate.HasValue)
+        todo.CreatedDate = updatedTodo.LastChangeDate;
 
+    todo.LastChangeDate = updatedTodo.LastChangeDate;
+    
     await db.SaveChangesAsync();
     return Results.Ok(todo);
 });

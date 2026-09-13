@@ -16,6 +16,10 @@ public class TodoViewModel
     // 🔴 Das neue Feld für Description
     public string? Description { get; set; } 
 
+    public DateTime? CreatedDate { get; set; }
+
+    public DateTime? LastChangeDate { get; set; }
+
     // NEU: Hilfseigenschaft, um die Unteraufgaben im Speicher zu bündeln
     public List<TodoViewModel> SubTodos { get; set; } = new();
 }

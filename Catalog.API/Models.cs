@@ -18,7 +18,13 @@ public class TodoItem
     // 🔴 Das neue Feld für PostgreSQL
     public int BatchId { get; set; } 
 
-    // 🔴 Das neue Feld für PostgreSQL
+    // 🔴 Feld für Details / Beschreibungstext
     public string? Description { get; set; } 
+
+    // 🔴 Datum erstellt
+    public DateTime? CreatedDate{ get; set; } 
+
+    // 🔴 Datum zuletzt geändert
+    public DateTime? LastChangeDate{ get; set; } 
 }
 

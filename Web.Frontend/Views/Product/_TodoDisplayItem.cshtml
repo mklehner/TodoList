@@ -1,3 +1,4 @@
+@using System.Diagnostics.Eventing.Reader
 @using Web.Frontend.Models
 @model Tuple<TodoViewModel, string, string, bool, int>
 
@@ -17,6 +18,16 @@
         {
             <span class="badge @(listenKlasse.Contains("bg-danger") ? "bg-danger" : "bg-secondary") ms-2">@item.DueDate.Value.ToString("dd.MM.yyyy")</span>
         }
+
+        @if (item.LastChangeDate.HasValue)
+        {            
+            <span class="badge bg-dark border border-secondary text-muted me-1" style="font-size: 0.7rem;">@item.LastChangeDate.Value.ToString("dd.MM.yyyy HH:mm")</span>
+        }
+        else
+        {
+            <span class="badge bg-dark border border-secondary text-muted me-1" style="font-size: 0.7rem;">@item.CreatedDate?.ToString("dd.MM.yyyy HH:mm")</span>
+        }
+
         @if (!string.IsNullOrEmpty(item.Notes))
         {
             <div class="small mt-1 text-muted" style="white-space: pre-line;">💬&nbsp; @item.Notes</div>
@@ -26,8 +37,14 @@
     <div class="d-flex gap-1 flex-shrink-0" onclick="event.stopPropagation();">
         <button class="btn btn-sm btn-outline-success" onclick="let t=prompt('Name der Unteraufgabe:'); if(t){ location.href='/Product/Create?title='+encodeURIComponent(t)+'&priority=Mittel&parentId='+@item.Id; }">+</button>
         <a asp-action="Index" asp-route-editId="@item.Id" asp-fragment="todo-@item.Id" class="btn btn-sm btn-outline-info">Edit</a>
-        <form asp-action="Toggle" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-primary">✓</button></form>
-        <form asp-action="Delete" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-secondary">X</button></form>
+        @if (item.IsCompleted)
+        {
+            <form asp-action="Toggle" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-secondary">✓</button></form>
+            <form asp-action="Delete" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-primary">X</button></form>
+        }else{
+            <form asp-action="Toggle" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-primary">✓</button></form>
+            <form asp-action="Delete" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-secondary">X</button></form>
+        }
     </div>
 </li>
 
