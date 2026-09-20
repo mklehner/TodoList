@@ -258,6 +258,65 @@ public class BewerbungEndpointsTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateStatus_SetsStatus_Returns200()
+    {
+        var item = Sample();
+        await SeedAsync(item);
+
+        var response = await _client.PutAsync($"/api/bewerbung/{item.Id}/status/Eingereicht", null);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Eingereicht", (await LoadAsync(item.Id))!.Status);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_AcceptsUmlautsInPath()
+    {
+        var item = Sample();
+        await SeedAsync(item);
+
+        var response = await _client.PutAsync($"/api/bewerbung/{item.Id}/status/{Uri.EscapeDataString("Gespräch")}", null);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Gespräch", (await LoadAsync(item.Id))!.Status);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_UnknownId_Returns404()
+    {
+        var response = await _client.PutAsync("/api/bewerbung/9999/status/Offen", null);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_Quirk_DoesNotUpdateLastChangeDate()
+    {
+        // Anders als Toggle und Edit (wie UpdateBatchId): keine Änderungszeit
+        var item = Sample();
+        await SeedAsync(item);
+
+        await _client.PutAsync($"/api/bewerbung/{item.Id}/status/Absage", null);
+
+        Assert.Null((await LoadAsync(item.Id))!.LastChangeDate);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_Quirk_AnyStatusStringIsAccepted()
+    {
+        // Die UI kennt sechs Status (Offen, Eingereicht, Geschlossen, Gespräch, Zusage, Absage);
+        // die API prüft weder die Liste noch die Länge (StringLength(50) wird nicht erzwungen)
+        var item = Sample();
+        await SeedAsync(item);
+        var longStatus = new string('x', 200);
+
+        var response = await _client.PutAsync($"/api/bewerbung/{item.Id}/status/{longStatus}", null);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(longStatus, (await LoadAsync(item.Id))!.Status);
+    }
+
+    [Fact]
     public async Task Delete_RemovesBewerbung_Returns204()
     {
         var item = Sample();

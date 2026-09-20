@@ -264,5 +264,30 @@ namespace Web.Frontend.Controllers
             // Zurück zur Liste springen (inklusive Scroll-Anker zum bearbeiteten Element)
             return RedirectToAction(nameof(Index), new { fragment = $"bewerbung-{id}" });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatus(int id, string status)
+        {
+            // 1. Bewerbung aus der Datenbank laden anhand der 'id'
+            // 2. bewerbung.Status = status;
+            // 3. Änderungen speichern (SaveChangesAsync)
+            
+            //debug: komm ich hier vorbei?            
+            //throw new Exception($"Es funktioniert! Id: {id}, status: {status}");
+
+            var response = await _httpClient.PutAsync($"/api/bewerbung/{id}/status/{status}", null);
+
+            // Sicherstellen, dass die API fertig geantwortet hat
+            if (response.IsSuccessStatusCode)
+            {
+                // Optional: Kurzes Auslesen des Contents zwingt zum Warten auf den Stream
+                var content = await response.Content.ReadAsStringAsync(); 
+            }
+            else
+                throw new Exception($"Failure Id: {id}, batchId: {status}. Status: {response.StatusCode}");
+
+            // Zurück zur Liste springen (inklusive Scroll-Anker zum bearbeiteten Element)
+            return RedirectToAction(nameof(Index), new { fragment = $"status-{id}" });
+        }
     }
 }

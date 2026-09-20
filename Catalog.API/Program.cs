@@ -34,7 +34,10 @@ using (var scope = app.Services.CreateScope())
     // Nur bei relationalen Providern (Npgsql); Tests laufen mit InMemory und kennen keine Migrationen
     if (db.Database.IsRelational())
     {
-        db.Database.Migrate();
+        // DIESE ZEILE HINZUFÜGEN: Gibt das komplette SQL-Skript im Docker-Log aus!
+        Console.WriteLine(db.Database.GenerateCreateScript());
+
+        db.Database.Migrate(); // <-- Geändert von EnsureCreated() zu Migrate()
     }
 }
 
@@ -245,6 +248,28 @@ app.MapPut("/api/bewerbung/{id}/batchId/{batchId}", async (int id, int batchId, 
     await db.SaveChangesAsync();
     return Results.Ok(bewerbung);
 });
+
+app.MapPut("/api/bewerbung/{id}/status/{status}", async (int id, string status, CatalogDbContext db) =>
+{
+    var bewerbung = await db.Bewerbungen.FindAsync(id);
+    if (bewerbung == null) 
+        return Results.NotFound();
+    
+    //Results.BadRequest($"new BatchId: {batchId}");
+
+    // // das anhaken wirkt wie eine Änderung
+    // // Holt die aktuelle deutsche Uhrzeit (inkl. automatischer Sommer-/Winterzeit)
+    // var zoneDe = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
+    // var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zoneDe); //DateTime.Now;
+    // DateTime? lastChangeDate = localNow;
+    // bewerbung.LastChangeDate = lastChangeDate;
+
+    bewerbung.Status = status;
+
+    await db.SaveChangesAsync();
+    return Results.Ok(bewerbung);
+});
+
 // -------------------------------------------------------------------------------------------------------------
 
 // NEU: Automatische Weiterleitung von der Startseite direkt zu Swagger

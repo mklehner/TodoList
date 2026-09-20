@@ -277,6 +277,68 @@ public class BewerbungControllerTests
         Assert.Contains("NotFound", ex.Message);
     }
 
+    // ─── UpdateStatus (wird per fetch aus site.js aufgerufen) ──────────
+
+    [Fact]
+    public async Task UpdateStatus_PutsToStatusEndpoint_AndRedirectsToIndex()
+    {
+        _handler.Respond(HttpStatusCode.OK, "{}");
+
+        var result = await _controller.UpdateStatus(7, "Eingereicht");
+
+        Assert.Equal("Index", Assert.IsType<RedirectToActionResult>(result).ActionName);
+        Assert.Equal(HttpMethod.Put, _handler.Single.Method);
+        Assert.Equal("/api/bewerbung/7/status/Eingereicht", _handler.Single.Uri.AbsolutePath);
+        Assert.Null(_handler.Single.Body);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_UmlautsArePercentEncodedInPath()
+    {
+        _handler.Respond(HttpStatusCode.OK, "{}");
+
+        await _controller.UpdateStatus(7, "Gespräch");
+
+        Assert.Equal("/api/bewerbung/7/status/Gespr%C3%A4ch", _handler.Single.Uri.AbsolutePath);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_Quirk_StatusIsNotEscaped_SlashChangesTheRoute()
+    {
+        // Der Status wird ungeprüft in den Pfad interpoliert (kein Uri.EscapeDataString)
+        _handler.Respond(HttpStatusCode.OK, "{}");
+
+        await _controller.UpdateStatus(7, "a/b");
+
+        Assert.Equal("/api/bewerbung/7/status/a/b", _handler.Single.Uri.AbsolutePath);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_Quirk_RedirectsWithFragmentAsRouteValue()
+    {
+        // Für den fetch-Aufruf aus site.js folgt der Browser diesem Redirect und lädt die komplette Index-Seite,
+        // obwohl nur der Statuscode (response.ok) ausgewertet wird
+        _handler.Respond(HttpStatusCode.OK, "{}");
+
+        var result = await _controller.UpdateStatus(7, "Offen");
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Null(redirect.Fragment);
+        Assert.Equal("status-7", redirect.RouteValues!["fragment"]);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_Quirk_ApiErrorStatus_ThrowsException_WithBatchIdInMessage()
+    {
+        // Copy-Paste aus UpdateBatchId: die Fehlermeldung nennt "batchId" statt "status"
+        _handler.Respond(HttpStatusCode.NotFound, "");
+
+        var ex = await Assert.ThrowsAsync<Exception>(() => _controller.UpdateStatus(7, "Offen"));
+
+        Assert.Contains("NotFound", ex.Message);
+        Assert.Contains("batchId: Offen", ex.Message);
+    }
+
     // ─── Hilfen ────────────────────────────────────────────────────────
 
     private Task<IActionResult> CreateSample() =>
