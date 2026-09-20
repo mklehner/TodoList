@@ -96,6 +96,7 @@ public class ProductController : Controller
 
         lastChangeDate = localNow; //DateTime.Now;
         
+        // wir machen das in Program.cs, weil hier keinen Dbcontext gibt!
         // if (! createdDate.HasValue)
         //      createdDate = localNow;
 
@@ -108,7 +109,7 @@ public class ProductController : Controller
             Priority = priority, 
             BatchId = batchId, 
             Description = description, 
-            //CreatedDate = createdDate,       // ist hier anscheinend immer null, weil das daeum in der Oberfläche nicht bearbeitet werden kann?
+            //CreatedDate = createdDate,       // kann nicht mehr geändert werden
             LastChangeDate = lastChangeDate};
 
         var content = new StringContent(JsonSerializer.Serialize(updatedTodo), Encoding.UTF8, "application/json");

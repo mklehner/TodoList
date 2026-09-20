@@ -1,0 +1,266 @@
+@using Web.Frontend.Models
+@model (BewerbungViewModel item, int depth)
+
+@{
+    // Argumente die hier übergeben werden: item und depth, und ViewData
+    // Siehe Index.html
+
+    var heute = DateTime.Today;
+    var item = Model.item;
+    var depth = Model.depth;            // eigntl. nicht mehr notwendig, da keine hierarische Baumstruktur vorleigt
+    int? editId = ViewData["EditId"] as int?;
+
+    bool istAbgelaufen = !item.IsCompleted && item.DueDate.HasValue && item.DueDate.Value.Date < heute;
+
+    string getBadgeCss (string prio){ 
+        if (prio == "Normal")
+            return "border border-warning text-warning bg-transparent";
+        else if (prio == "High Match")
+            return "border border-danger text-danger bg-transparent";
+        else if (prio == "Low Match")
+            return "border border-secondary text-secondary bg-transparent";
+        else //(prio == "Special")
+            return "border border-secondary text-secondary bg-transparent";
+    };
+
+    string prioBadge = getBadgeCss(item.Priority);
+
+    @* string prioBadge = item.Priority == "High-Match" ? "border border-danger text-danger bg-transparent" : item.Priority == "Normal" 
+            ? "border border-warning text-warning bg-transparent" 
+            : "border border-secondary text-secondary bg-transparent"; *@
+
+    string listenKlasse = istAbgelaufen ? "bg-danger bg-opacity-25 text-white border-danger" : "bg-dark text-white border-secondary";
+    
+    bool istImEditModus = editId.HasValue && editId.Value == item.Id;
+}
+
+<style>
+    .list-group-item, .bw-flat-item {
+        background-color: #2b3035;
+        color: #fff;
+    }
+    .bw-node-container {
+        --toggle-width: 2rem;
+        display: block;
+        width: 100%;
+        position: relative;
+    }
+
+    summary.bw-summary, .bw-flat-item {
+        display: block;
+        outline: none;
+        position: relative;
+        padding-left: var(--toggle-width) !important;
+    }
+    
+    summary.bw-summary {
+        cursor: pointer;
+    }
+
+    summary.bw-summary::marker,
+    summary.bw-summary::-webkit-details-marker {
+        display: none !important;
+    }
+
+    /* Die Quadratische Box skaliert nun relativ mit (em) */
+    summary.bw-summary::before, .bw-flat-item::before {
+        content: "+";
+        position: absolute;
+        left: 0.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.15em;
+        height: 1.15em;
+        border: 2px solid #6c757d;
+        border-radius: 0.25rem;
+        background-color: #2b3035;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+        font-weight: bold;
+        font-size: 0.85em;
+        font-family: monospace;
+        line-height: 1;
+        transition: all 0.15s ease-in-out;
+    }
+
+    summary.bw-summary:hover::before {
+        border-color: #f8f9fa;
+        color: #f8f9fa;
+        background-color: #343a40;
+    }
+
+    details[open] > summary.bw-summary::before {
+        content: "−";
+        border-color: #495057;
+        color: #6c757d;        
+    }
+    
+</style>
+
+<div class="mt-1">
+
+    <div class="bw-flat-item todo-details-node" id="todo-@item.Id" data-todo-id="@item.Id">
+        @if (istImEditModus)
+        {
+            @await Html.PartialAsync("_BewerbungEditForm", item)
+        }
+        else
+        {
+            @await Html.PartialAsync("_BewerbungDisplayItem", Tuple.Create(item, listenKlasse, prioBadge, depth))
+        }
+    </div>
+</div>
+
+<script>
+(function () {
+    const currentId = "@item.Id";
+    const istImEditModus = @istImEditModus.ToString().ToLower();
+    const element = document.getElementById("todo-" + currentId);
+
+    // 1. EVENT HANDLER: Beim Klick auf Abbrechen oder Speichern die ID merken
+    if (element && istImEditModus) {
+        const cancelBtn = element.querySelector("a[asp-action='Index'], .btn-light");
+        const form = element.querySelector("form");
+
+        const markAsTarget = () => sessionStorage.setItem("last-interacted-todo", currentId);
+
+        if (cancelBtn) cancelBtn.addEventListener("click", markAsTarget);
+        if (form) form.addEventListener("submit", markAsTarget);
+    }
+
+    // 2. SCROLL-LOGIK: Element mittig platzieren
+    if (element) {
+        const lastInteractedId = sessionStorage.getItem("last-interacted-todo");
+
+        // Zustand A: Das Element wurde gerade aktiv aufgeklappt
+        // Zustand B: Das Element wurde gerade aktiv zugeklappt (gespeichert/abgebrochen)
+        if (istImEditModus || lastInteractedId === currentId) {
+            
+            // Timeout sorgt dafür, dass der Browser das Layout fertig berechnet hat
+            setTimeout(() => {
+                element.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+                
+                // Nach dem Scrollen den Status wieder zurücksetzen
+                if (!istImEditModus) {
+                    sessionStorage.removeItem("last-interacted-todo");
+                }
+            }, 100); // 100ms gibt dem Browser genug Zeit fürs Rendering
+        }
+    }
+})();
+</script>
+
+<!--script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Scroll-Position nach dem Laden wiederherstellen
+    const scrollPos = sessionStorage.getItem("sidebar-scroll");
+    if (scrollPos) {
+        window.scrollTo(0, parseInt(scrollPos));
+        sessionStorage.removeItem("sidebar-scroll"); // Optional: Sofort wieder löschen
+    }
+
+    // 2. Scroll-Position vor dem Verlassen der Seite speichern
+    window.addEventListener("beforeunload", function () {
+        sessionStorage.setItem("sidebar-scroll", window.scrollY);
+    });
+});
+</script-->
+<!--script>
+document.addEventListener("DOMContentLoaded", function () {
+    // ID des aktuellen Elements in dieser Teilansicht ermitteln
+    const currentId = "@item.Id";
+    const element = document.getElementById("todo-" + currentId);
+    const istImEditModus = @istImEditModus.ToString().ToLower();
+
+    if (element) {
+        if (istImEditModus) {
+            // --- FALL 1: KNOTEN WURDE AUFGEKLAPPT (EDIT-MODUS) ---
+            
+            // Vorherige Scrollposition merken, um sie beim Zuklappen wiederherzustellen
+            sessionStorage.setItem("scroll-before-edit-" + currentId, window.scrollY);
+
+            // Kurz warten, bis das Formular komplett gerendert ist, dann flüssig in die Mitte scrollen
+            setTimeout(() => {
+                element.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            }, 50);
+
+        } else {
+            // --- FALL 2: KNOTEN WURDE ZUGEKLAPPT / GESPEICHERT ---
+            
+            // Prüfen, ob für diesen spezifischen Knoten eine alte Scrollposition existiert
+            const prevScrollPos = sessionStorage.getItem("scroll-before-edit-" + currentId);
+            
+            if (prevScrollPos !== null) {
+                // Zur alten Position zurückspringen (kann auf "smooth" für eine Animation geändert werden)
+                window.scrollTo({
+                    top: parseInt(prevScrollPos),
+                    behavior: "auto" 
+                });
+                // Speicher bereinigen
+                sessionStorage.removeItem("scroll-before-edit-" + currentId);
+            }
+        }
+    }
+});
+</script-->
+<!--script>
+(function () {
+    const currentId = "@item.Id";
+    const istImEditModus = @istImEditModus.ToString().ToLower();
+    
+    // Greift nun auf die neue, vereinheitlichte ID zu
+    const element = document.getElementById("todo-" + currentId);
+
+    // 1. WIEDERHERSTELLEN NACH DEM NEULADEN
+    if (istImEditModus && element) {
+        // Fall A: Aufklappen -> Mittig zentrieren
+        setTimeout(() => {
+            element.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }, 80);
+    } else {
+        // Fall B: Zuklappen (Abbrechen/Speichern) -> Exakte alte Position erzwingen
+        const savedScroll = sessionStorage.getItem("mvc-todo-scroll");
+        if (savedScroll !== null) {
+            window.scrollTo({
+                top: parseInt(savedScroll),
+                behavior: "auto"
+            });
+            sessionStorage.removeItem("mvc-todo-scroll");
+        }
+    }
+
+    // 2. SCROLLPOSITION VOR DEM KUCK/SUBMIT SPEICHERN
+    if (element) {
+        if (istImEditModus) {
+            const cancelBtn = element.querySelector("a[asp-action='Index'], .btn-light");
+            const form = element.querySelector("form");
+
+            // Beim Klick auf Abbrechen
+            if (cancelBtn) {
+                cancelBtn.addEventListener("click", function () {
+                    sessionStorage.setItem("mvc-todo-scroll", window.scrollY);
+                });
+            }
+
+            // Beim Absenden des Formulars (Speichern)
+            if (form) {
+                form.addEventListener("submit", function () {
+                    sessionStorage.setItem("mvc-todo-scroll", window.scrollY);
+                });
+            }
+        }
+    }
+})();
+</script-->
+

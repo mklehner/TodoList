@@ -1,0 +1,184 @@
+@model Web.Frontend.Models.BewerbungViewModel
+
+<li id="todo-@Model.Id" class="list-group-item bg-secondary p-3 pt-2 pb-2 border-info rounded w-100">
+    <form asp-action="Edit" asp-fragment="todo-@Model.Id" method="post" class="w-100">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <input type="hidden" name="isCompleted" value="@Model.IsCompleted" />
+        
+        <!-- Falls deine API 'createdDate' braucht, schicken wir sie als hidden mit -->        
+        <input type="hidden" name="createdDate" value="@(Model.CreatedDate?.ToString("yyyy-MM-ddTHH:mm:ss"))" />
+
+        <div class="row g-2 mb-2 align-items-center">
+            <!-- Freelance Checkbox (rechtsbündigbündig neben dem Titel) -->
+            <div class="col-md-9">
+                <label class="form-check-label large text-white">Stellenanzeige editieren</label>
+            </div>
+            <div class="col-md-2 ms-auto">
+                <div class="form-check m-0 d-flex align-items-center" style="min-height: 31px;">
+                    <!--input type="checkbox" name="isFreelance" id="isFreelance" class="form-check-input bg-dark border-secondary me-2" checked="@Model.IsFreelance" required/-->
+                    <input type="checkbox" name="isFreelance" id="isFreelance" class="form-check-input bg-dark border-secondary me-2" value="true" @(Model.IsFreelance ? "checked" : "") />
+
+                    <label class="form-check-label small text-white-50" for="isFreelance">Freelance</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-0">
+            <div class="col-md-8 col-16 mt-0">
+                <label class="form-label small text-white-50 m-0">Stelle</label>
+                <input type="text" name="jobTitle" class="form-control form-control-sm bg-dark text-white" value="@Model.JobTitle" required />
+            </div>
+            <div class="col-md-2 col-4 mt-0">
+                <label class="form-label small text-white-50 m-0">Status</label>
+                <select name="status" class="form-select form-select-sm bg-dark text-white">
+                    <option value="Offen" selected="@(Model.Status == "Offen")">Offen</option>
+                    <option value="Eingereicht" selected="@(Model.Status == "Eingereicht")">Eingereicht</option>
+                    <option value="Geschlossen" selected="@(Model.Status == "Geschlossen")">Geschlossen</option>
+                    <option value="Gespräch" selected="@(Model.Status == "Gespräch")">Gespräch</option>
+                    <option value="Zusage" selected="@(Model.Status == "Zusage")">Zusage</option>
+                    <option value="Absage" selected="@(Model.Status == "Absage")">Absage</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-4 mt-0">
+                <label class="form-label small text-white-50 m-0">Bewerbungsdatum</label>
+                <input type="date" lang="de" name="bewerbungsDatum" class="form-control form-control-sm bg-dark text-white" value="@(Model.BewerbungsDatum?.ToString("yyyy-MM-dd"))" />
+            </div>
+        </div>
+
+        <div class="row g-2 mb-2">
+            <div class="col-md-8 col-16">
+                <label class="form-label small text-white-50 m-0">Unternehmen</label>
+                <input type="text" name="unternehmen" class="form-control form-control-sm bg-dark text-white" value="@Model.Unternehmen" required />
+            </div>
+
+            <div class="col-md-2 col-4">
+                <label class="form-label small text-white-50 m-0">Match (Prio)</label>
+                <select name="priority" class="form-select form-select-sm bg-dark text-white">
+                    <option value="Normal" selected="@(Model.Priority == "Normal")">Normal</option>
+                    <option value="High Match" selected="@(Model.Priority == "High Match")">High Match</option>
+                    <option value="Low Match" selected="@(Model.Priority == "Low Match")">Low Match</option>
+                    <option value="Special" selected="@(Model.Priority == "Special")">Special</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 col-4">
+                <label class="form-label small text-white-50 m-0">Bw.-Frist</label>
+                <input type="date" lang="de" name="dueDate" class="form-control form-control-sm bg-dark text-white" value="@(Model.DueDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+        </div>
+
+        <div class="row g-2 mb-2">
+            <div class="col-md-2 col-4">
+                <label class="form-label small text-white-50 m-0">BatchId</label>
+                <input type="number" name="batchId" class="form-control form-control-sm bg-dark text-white" id="BatchId-@Model.Id" value="@Model.BatchId" min="0" required />
+            </div>
+            <div class="col-md-6 col-12">
+                <label class="form-label small text-white-50 m-0">💬 Notizen</label>
+                <textarea name="notes" class="form-control form-control-sm bg-dark text-white" rows="1" placeholder="Optionale Notizen hinzufügen...">@Model.Notes</textarea>
+            </div>
+            <div class="col-md-4 col-8">
+                <label class="form-label small text-white-50 m-0">Kontakt</label>
+                <input type="text" name="kontakt" class="form-control form-control-sm bg-dark text-white" value="@Model.Kontakt" />
+                <!--input type="text" asp-for="Kontakt" class="form-control form-control-sm bg-dark text-white" /-->
+                
+            </div>
+        </div>
+
+        <div class="row g-2 mb-2">
+            <div class="col-12">
+                <details>
+                    <summary class="form-label small text-white-50 role="button" style="cursor: pointer;">Stellenanzeige...
+                    @{ if (!string.IsNullOrEmpty(@Model.Description)) 
+                        if(@Model.Description.Length < 32)
+                        {
+                            @Model.Description;
+                        }
+                        else
+                        {
+                            @Model.Description.Substring(0,32);
+                        }
+                        @:...
+                    }
+                    </summary>
+                    <textarea name="description" class="form-control form-control-sm bg-dark text-white mt-1" rows="20" placeholder="Beschreibung hinzufügen...">@Model.Description</textarea>
+                </details>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-2">
+            <div class="col-12">
+                <details>
+                    <summary class="form-label small text-white-50 role="button" style="cursor: pointer;">Anschreiben...
+                    @{ if (!string.IsNullOrEmpty(@Model.Anschreiben))                        
+                        if(@Model.Anschreiben.Length < 32)
+                        {
+                            @Model.Anschreiben;
+                        }
+                        else
+                        {
+                            @Model.Anschreiben.Substring(0,32);
+                        }
+                        @:...
+                    }
+                    </summary>
+                    <textarea name="anschreiben" class="form-control form-control-sm bg-dark text-white mt-1" rows="20" placeholder="Sehr geehrte Damen und Herren...">@Model.Anschreiben</textarea>
+                </details>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-2">
+            <div class="col-12">
+                <details>
+                    <summary class="form-label small text-white-50 role="button" style="cursor: pointer;">Lebenslauf...
+                        @{ if (!string.IsNullOrEmpty(@Model.Lebenslauf)) 
+                        if(@Model.Lebenslauf.Length < 32)
+                        {
+                            @Model.Lebenslauf;
+                        }
+                        else
+                        {
+                            @Model.Lebenslauf.Substring(0,32);
+                        }
+                        @:...
+                    }
+                    </summary>
+                    <input type="text" name="lebenslauf" class="form-control form-control-sm bg-dark text-white" value="@Model.Lebenslauf" />
+                </details>
+            </div>
+        </div>
+
+        <div class="row g-2 align-items-center">
+            <div class="col-auto">
+                <div class="d-flex justify-content-start align-items-center gap-2">
+                    <!-- Razor-Code -->
+                    <!-- label class="form-label small text-white-50 m-0 mt-2 text-nowrap">
+                        @* @if (Model.LastChangeDate.HasValue) {
+                            @:Last change: @Model.LastChangeDate?.ToString("dd.MM.yyyy HH:mm") 
+                        } else if (Model.CreatedDate.HasValue) {
+                            @:Created: @Model.CreatedDate?.ToString("dd.MM.yyyy HH:mm")
+                        }*@
+                    </label-->
+                    <label class="form-label small text-white-50 m-0 mt-2 text-nowrap">
+                    @if (Model.CreatedDate.HasValue)
+                    {
+                        @:Created: @Model.CreatedDate.Value.ToString("dd.MM.yyyy HH:mm")
+                    }
+                    @if (Model.CreatedDate.HasValue && Model.LastChangeDate.HasValue)
+                    {
+                        @: ,
+                    }
+                    @if (Model.LastChangeDate.HasValue)
+                    {
+                        @:Last change: @Model.LastChangeDate.Value.ToString("dd.MM.yyyy HH:mm")
+                    }
+                    </label>
+                </div>
+            </div>
+            <div class="col-auto ms-auto">
+            <a asp-action="Index" asp-fragment="todo-@Model.Id" class="btn btn-sm btn-light px-3">Abbrechen</a>
+            <button type="submit" class="btn btn-sm btn-success px-3">Speichern</button>
+            </div>
+        </div>
+    </form>
+</li>
+

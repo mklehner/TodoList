@@ -9,5 +9,9 @@ public class CatalogDbContext : DbContext
     
     // Die Tabelle heißt nun 'Todos'
     public DbSet<TodoItem> Todos => Set<TodoItem>();
+
+    // Die Tabelle heißt nun 'Bewerbungen'
+    public DbSet<Bewerbung> Bewerbungen => Set<Bewerbung>();
+
 }
 

@@ -1,0 +1,101 @@
+@using System.Diagnostics.Eventing.Reader
+@using Web.Frontend.Models
+@model Tuple<BewerbungViewModel, string, string, int> // Achtung!! das Tule muss passen zum Aufruf in Index.cshtml
+
+@{
+    var item = Model.Item1;
+    var listenKlasse = Model.Item2;
+    var prioBadge = Model.Item3;
+}
+
+<li id="bewerbung-@item.Id" class="list-group-item d-flex justify-content-between align-items-center rounded w-100">
+    <div class="text-truncate me-3" style="flex: 1;">
+
+        <!-- DIREKTES INLINE-FORMULAR STATT BADGE -->
+        <!--form asp-action="UpdateBatchId" method="post" class="d-inline m-0 p-0" onclick="event.stopPropagation();">
+            <input type="hidden" name="id" value="@item.Id" />
+            
+            <div class="badge bg-dark border border-secondary text-muted me-1 p-1 d-inline-flex align-items-center" style="font-size: 0.7rem;">
+                <label for="BatchId-@item.Id" class="text-secondary m-0 p-0 me-0" style="cursor: text;">#</label>
+                <input type="number" 
+                    name="batchId" 
+                    id="BatchId-@item.Id" 
+                    value="@item.BatchId" 
+                    min="0" 
+                    required 
+                    class="bg-transparent text-white border-0 p-0 m-0" 
+                    style="font-size: 0.7rem; width: 35px; outline: none; text-align: left; -moz-appearance: textfield;"
+                    onblur="if(this.value !== '@item.BatchId') { this.form.submit(); }" 
+                    onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }" />
+            </div>
+        </form-->
+        <!-- DIREKTES INLINE-EDITING MIT AJAX (OHNE SEITEN-RELOAD) -->
+        <div class="badge bg-dark border border-secondary text-muted me-1 p-1 d-inline-flex align-items-center" 
+            style="font-size: 0.7rem;" 
+            onclick="event.stopPropagation();">
+            
+            <label for="BatchId-@item.Id" class="text-secondary m-0 p-0 me-0" style="cursor: text;">#</label>
+            <input type="number" 
+                id="BatchId-@item.Id" 
+                value="@item.BatchId" 
+                min="0" 
+                required 
+                class="bg-transparent text-white border-0 p-0 m-0 batch-id-input" 
+                style="font-size: 0.7rem; width: 35px; outline: none; text-align: left; -moz-appearance: textfield;"
+                data-id="@item.Id"
+                data-old-value="@item.BatchId"
+                onblur="sendBatchIdAjax(this);" 
+                onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }" />
+        </div>
+
+        <!--span class="badge bg-dark border border-secondary text-muted me-1" style="font-size: 0.7rem;">#@item.BatchId</span-->
+        <span class="badge @prioBadge me-1" style="font-size: 0.7rem;">@item.Priority</span>
+        <span class="badge bg-dark border border-secondary text-muted me-1" style="font-size: 0.7rem;">@(item.IsFreelance ? "Freelance" : "Festanstellung")</span>
+        <span class="fw-bold" style="@(item.IsCompleted ? "text-decoration: line-through; color: #888888;" : "")">@item.JobTitle</span>
+        
+        @if (item.DueDate.HasValue)
+        {
+            <span class="badge @(listenKlasse.Contains("bg-danger") ? "bg-danger" : "bg-secondary") ms-2">@item.DueDate.Value.ToString("dd.MM.yyyy")</span>
+        }
+
+        @if (item.LastChangeDate.HasValue)
+        {            
+            <span class="badge bg-dark border border-secondary text-muted me-1" style="font-size: 0.7rem;">@item.LastChangeDate.Value.ToString("dd.MM.yyyy HH:mm")</span>
+        }
+        else
+        {
+            <span class="badge bg-dark border border-secondary text-muted me-1" style="font-size: 0.7rem;">@item.CreatedDate?.ToString("dd.MM.yyyy HH:mm")</span>
+        }
+
+        @if (!string.IsNullOrEmpty(item.Unternehmen))
+        {
+            <div class="small mt-1 text-muted" style="white-space: pre-line;">@item.Unternehmen</div>
+        }
+
+        @if (!string.IsNullOrEmpty(item.Notes))
+        {
+            @if (item.Status == "Geschlossen")
+            {
+                <span class="badge bg-dark border border-secondary text-secondary bg-transparent me-1" style="font-size: 0.7rem;">@item.Status</span>
+            }
+            else if (item.BewerbungsDatum.HasValue)
+            {
+            <span class="badge bg-dark border border-success text-success bg-transparent me-1" style="font-size: 0.7rem;">@item.BewerbungsDatum.Value.ToString("dd.MM.yyyy")</span>
+            }
+            <span class="small mt-1 text-muted" style="white-space: pre-line;">💬&nbsp; @item.Notes</span>
+        }
+    </div>
+    
+    <div class="d-flex gap-1 flex-shrink-0" onclick="event.stopPropagation();">
+        <a asp-action="Index" asp-route-editId="@item.Id" asp-fragment="bewerbung-@item.Id" class="btn btn-sm btn-outline-info">Edit</a>
+        @if (item.IsCompleted)
+        {
+            <form asp-action="Toggle" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-secondary">✓</button></form>
+            <form asp-action="Delete" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-primary">X</button></form>
+        }else{
+            <form asp-action="Toggle" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-primary">✓</button></form>
+            <form asp-action="Delete" method="post" class="m-0"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-sm btn-secondary">X</button></form>
+        }
+    </div>
+</li>
+
