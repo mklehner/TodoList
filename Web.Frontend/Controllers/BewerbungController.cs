@@ -111,7 +111,7 @@ namespace Web.Frontend.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: /Product/Edit (Aufgabe aktualisieren)
+        // POST: /Bewerbung/Edit (Bewerbung aktualisieren)
         // public async Task<IActionResult> Edit(int id, BewerbungViewModel bwModel)
         // statt alle Parameter einzeln in die Edit-Methode zu schreiben (int id, string jobTitle, ...), 
         // kannst du auch direkt dein BewerbungViewModel als Parameter nutzen. ASP.NET Core mappt das automatisch, 

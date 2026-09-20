@@ -5,11 +5,11 @@ using Web.Frontend.Models;
 
 namespace Web.Frontend.Controllers;
 
-public class ProductController : Controller
+public class TodoController : Controller
 {
     private readonly HttpClient _httpClient;
 
-    public ProductController(IHttpClientFactory httpClientFactory, IConfiguration config)
+    public TodoController(IHttpClientFactory httpClientFactory, IConfiguration config)
     {
         _httpClient = httpClientFactory.CreateClient();
         _httpClient.BaseAddress = new Uri(config["BackendUrl"] ?? "http://localhost:5001");
@@ -83,7 +83,7 @@ public class ProductController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // POST: /Product/Edit (Aufgabe aktualisieren)
+    // POST: /Todo/Edit (Aufgabe aktualisieren)
     [HttpPost]
     public async Task<IActionResult> Edit(int id, string title, DateTime? dueDate, string? notes, string priority, bool isCompleted, int batchId, string? description, DateTime? createdDate, DateTime? lastChangeDate)
     {
@@ -118,7 +118,7 @@ public class ProductController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // POST: /Product/Toggle (Status Erledigt/Offen umschalten)
+    // POST: /Todo/Toggle (Status Erledigt/Offen umschalten)
     [HttpPost]
     public async Task<IActionResult> Toggle(int id)
     {
@@ -126,7 +126,7 @@ public class ProductController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // POST: /Product/Delete (Aufgabe löschen)
+    // POST: /Todo/Delete (Aufgabe löschen)
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {

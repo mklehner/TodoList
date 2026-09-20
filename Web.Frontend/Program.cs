@@ -10,10 +10,10 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 
-// Standardroute auf unseren ProductController setzen
+// Standardroute auf unseren TodoController setzen
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Product}/{action=Index}/{id?}");
+    pattern: "{controller=Todo}/{action=Index}/{id?}");
 
 app.Run();
 

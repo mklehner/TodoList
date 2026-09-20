@@ -11,13 +11,13 @@ using Xunit;
 
 namespace Web.Frontend.Tests;
 
-public class ProductControllerTests
+public class TodoControllerTests
 {
     private readonly Mock<IHttpClientFactory> _factoryMock;
     private readonly Mock<HttpMessageHandler> _handlerMock;
     private readonly Mock<IConfiguration> _configMock;
 
-    public ProductControllerTests()
+    public TodoControllerTests()
     {
         _handlerMock = new Mock<HttpMessageHandler>();
         _factoryMock = new Mock<IHttpClientFactory>();
@@ -31,7 +31,7 @@ public class ProductControllerTests
     }
 
     [Fact]
-    public async Task Index_ReturnsViewWithProducts_WhenApiCallIsSuccessful()
+    public async Task Index_ReturnsViewWithTodos_WhenApiCallIsSuccessful()
     {
         // ARRANGEMENT
         _handlerMock
@@ -47,7 +47,7 @@ public class ProductControllerTests
                 Content = new StringContent("[]", Encoding.UTF8, "application/json")
             });
 
-        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
+        var controller = new TodoController(_factoryMock.Object, _configMock.Object);
 
         // ACT
         var result = await controller.Index(editId: null, search: null, priorityFilter: null);
@@ -80,7 +80,7 @@ public class ProductControllerTests
                 Content = new StringContent(flatJson, Encoding.UTF8, "application/json")
             });
 
-        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
+        var controller = new TodoController(_factoryMock.Object, _configMock.Object);
 
         // ACT
         var result = await controller.Index(editId: null, search: null, priorityFilter: null);
@@ -117,7 +117,7 @@ public class ProductControllerTests
                 Content = new StringContent("[]", Encoding.UTF8, "application/json")
             });
 
-        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
+        var controller = new TodoController(_factoryMock.Object, _configMock.Object);
         string searchWord = "Bewerbung";
         string filterPrio = "Hoch";
 
@@ -158,7 +158,7 @@ public class ProductControllerTests
             })
             .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.Created });
 
-        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
+        var controller = new TodoController(_factoryMock.Object, _configMock.Object);
 
         // ACT
         var result = await controller.Create("Bewerbung abschicken", DateTime.Today, "C# Projekt zeigen", "Hoch");
@@ -203,7 +203,7 @@ public class ProductControllerTests
             })
             .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
 
-        var controller = new ProductController(_factoryMock.Object, _configMock.Object);
+        var controller = new TodoController(_factoryMock.Object, _configMock.Object);
 
         // ACT - 🔴 Aufruf angepasst: Parameter 'batchId: testBatchId' am Ende übergeben
         var result = await controller.Edit(testId, "Titel geändert", DateTime.Today, "Neue Notiz", "Niedrig", isCompleted: false, batchId: testBatchId, description: testDescription, DateTime.Now, DateTime.Now);
