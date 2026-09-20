@@ -31,10 +31,11 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
 
-    // DIESE ZEILE HINZUFÜGEN: Gibt das komplette SQL-Skript im Docker-Log aus!
-    Console.WriteLine(db.Database.GenerateCreateScript());
-
-    db.Database.Migrate(); // <-- Geändert von EnsureCreated() zu Migrate()
+    // Nur bei relationalen Providern (Npgsql); Tests laufen mit InMemory und kennen keine Migrationen
+    if (db.Database.IsRelational())
+    {
+        db.Database.Migrate();
+    }
 }
 
 // REST-Endpunkte für die Todo-Liste
@@ -253,4 +254,7 @@ app.MapGet("/", (HttpContext context) => {
 });
 
 app.Run();
+
+// Macht die Top-Level-Program-Klasse für WebApplicationFactory<Program> in den Tests sichtbar
+public partial class Program { }
 
