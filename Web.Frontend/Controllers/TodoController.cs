@@ -133,7 +133,5 @@ public class ProductController : Controller
         await _httpClient.DeleteAsync($"/api/todos/{id}");
         return RedirectToAction(nameof(Index));
     }
-
-    private string? cookiesOrParam(string? val) => val; // Hilfsfunktion für sauberes Routing
 }
 

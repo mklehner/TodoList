@@ -10,12 +10,6 @@ namespace Web.Frontend.Controllers
         private readonly HttpClient _httpClient;
 
         // Per Dependency Injection übergeben wir den HttpClient
-        // public BewerbungydController(IHttpClientFactory httpClientFactory)
-        // {
-        //     // Erstellt den Client (Konfiguration erfolgt gleich in Program.cs)
-        //     _httpClient = httpClientFactory.CreateClient("CatalogAPI");
-        // }
-        
         public BewerbungController(IHttpClientFactory httpClientFactory, IConfiguration config)
         {
             _httpClient = httpClientFactory.CreateClient();
