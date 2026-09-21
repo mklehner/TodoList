@@ -85,6 +85,33 @@
         </div>
 
         <div class="row g-2 mb-2">
+            <div class="col-md-3 col-6">
+                <label class="form-label small text-white-50 m-0">Vorst.-Termin</label>
+                <input type="datetime-local" lang="de" name="vorstellungsTermin" class="form-control form-control-sm bg-dark text-white" value="@(Model.VorstellungsTermin?.ToString("yyyy-MM-ddTHH:mm"))" />
+            </div>
+            <div class="col-md-9 col-18">
+                <!--details>
+                    <summary class="form-label small text-white-50 role="button m-0" style="cursor: pointer;">Verbleib...
+                    @{ if (!string.IsNullOrEmpty(@Model.Verbleib)) 
+                        if(@Model.Verbleib.Length < 32)
+                        {
+                            @Model.Verbleib;
+                        }
+                        else
+                        {
+                            @Model.Verbleib.Substring(0,32);
+                        }
+                        @:...
+                    }
+                    </summary>
+                    <textarea name="verbleib" class="form-control form-control-sm bg-dark text-white mt-0" rows="3" placeholder="Verbleib...">@Model.Verbleib</textarea>
+                </details-->
+                <label class="form-label small text-white-50 m-0">Verbleib</label>
+                <textarea name="verbleib" class="form-control form-control-sm bg-dark text-white m-0" rows="2" placeholder="Verbleib...">@Model.Verbleib</textarea>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-2">
             <div class="col-12">
                 <details>
                     <summary class="form-label small text-white-50 role="button" style="cursor: pointer;">Stellenanzeige...

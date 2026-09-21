@@ -52,7 +52,9 @@ namespace Web.Frontend.Controllers
                 string? anschreiben,
                 string status,
                 string? lebenslauf,
-                DateTime bewerbungsDatum,
+                DateTime? bewerbungsDatum,
+                DateTime? vorstellungsTermin,
+                string? verbleib,
                 string? kontakt, 
                 DateTime? createdDate,
                 DateTime? lastChangeDate
@@ -92,6 +94,8 @@ namespace Web.Frontend.Controllers
                 Anschreiben = anschreiben,
                 Lebenslauf = lebenslauf,
                 BewerbungsDatum = bewerbungsDatum,
+                VorstellungsTermin = vorstellungsTermin,
+                Verbleib = verbleib,
                 Kontakt = kontakt,
                 CreatedDate = createdDate
                 //LastChangeDate = lastChangeDate   // wird hier nicht angelegt
@@ -131,7 +135,9 @@ namespace Web.Frontend.Controllers
             string status,      //P.
             string? anschreiben, 
             string? lebenslauf, 
-            DateTime? bewerbungsDatum, 
+            DateTime? bewerbungsDatum,
+            DateTime? vorstellungsTermin,
+            string? verbleib,
             string? kontakt, 
             DateTime? createdDate, 
             DateTime? lastChangeDate)
@@ -192,6 +198,8 @@ namespace Web.Frontend.Controllers
                 Anschreiben = anschreiben,
                 Lebenslauf = lebenslauf,
                 BewerbungsDatum = bewerbungsDatum,
+                VorstellungsTermin = vorstellungsTermin,
+                Verbleib = verbleib,
                 Kontakt = kontakt,
                 //CreatedDate = createdDate,    // kann nicht mehr geändert werden
                 LastChangeDate = lastChangeDate

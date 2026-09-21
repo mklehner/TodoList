@@ -183,6 +183,8 @@ app.MapPut("/api/bewerbung/{id}", async (int id, Bewerbung updBewerbung, Catalog
     bewerbung.Anschreiben = updBewerbung.Anschreiben;
     bewerbung.Lebenslauf = updBewerbung.Lebenslauf;
     bewerbung.BewerbungsDatum = updBewerbung.BewerbungsDatum;
+    bewerbung.VorstellungsTermin = updBewerbung.VorstellungsTermin;
+    bewerbung.Verbleib = updBewerbung.Verbleib;
     bewerbung.Kontakt = updBewerbung.Kontakt;
 
     // CreatedDate soll nicht mehr geändert werden, 

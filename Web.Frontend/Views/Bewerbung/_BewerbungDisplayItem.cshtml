@@ -51,7 +51,14 @@
         <!--span class="badge bg-dark border border-secondary text-muted me-1" style="font-size: 0.7rem;">#@item.BatchId</span-->
         <span class="badge @prioBadge me-1" style="font-size: 0.7rem;">@item.Priority</span>
         <span class="badge bg-dark border border-secondary text-muted me-1" style="font-size: 0.7rem;">@(item.IsFreelance ? "Freelance" : "Festanstellung")</span>
-        <span class="fw-bold" style="@(item.IsCompleted ? "text-decoration: line-through; color: #888888;" : "")">@item.JobTitle</span>
+        <span class="fw-bold" style="@(item.IsCompleted ? "text-decoration: line-through; color: #888888;" : "")">            
+            @if (item.JobTitle.Length < 32){
+                @item.JobTitle;
+            } else {
+                @item.JobTitle.Substring(0,32);
+                @:&nbsp;
+            }            
+        </span>
         
         @if (item.DueDate.HasValue)
         {
@@ -93,17 +100,23 @@
                 <option value="Absage" selected="@(item.Status == "Absage")">Absage</option>
             </select>
         </div>
+        
+        @if (item.Status == "Geschlossen")
+        {
+            <span class="badge bg-dark border border-secondary text-secondary bg-transparent me-1" style="font-size: 0.7rem;">@item.Status</span>
+        }
+        else if (item.BewerbungsDatum.HasValue)
+        {
+            <span class="badge bg-dark border border-success text-success bg-transparent me-1" style="font-size: 0.7rem;">BW: @item.BewerbungsDatum.Value.ToString("dd.MM.yyyy")</span>
+        }
+        
+        @if (item.VorstellungsTermin.HasValue)
+        {
+            <span class="badge bg-dark border border-danger text-danger bg-transparent me-1" style="font-size: 0.7rem;">VT: @item.VorstellungsTermin.Value.ToString("dd.MM.yyyy")</span>
+        }
 
         @if (!string.IsNullOrEmpty(item.Notes))
         {
-            @if (item.Status == "Geschlossen")
-            {
-                <span class="badge bg-dark border border-secondary text-secondary bg-transparent me-1" style="font-size: 0.7rem;">@item.Status</span>
-            }
-            else if (item.BewerbungsDatum.HasValue)
-            {
-            <span class="badge bg-dark border border-success text-success bg-transparent me-1" style="font-size: 0.7rem;">BW: @item.BewerbungsDatum.Value.ToString("dd.MM.yyyy")</span>
-            }
             <span class="small mt-1 text-muted" style="white-space: pre-line;">💬&nbsp; @item.Notes</span>
         }
 

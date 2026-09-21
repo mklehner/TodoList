@@ -40,6 +40,10 @@ namespace Catalog.API.Models
 
         public DateTime? BewerbungsDatum { get; set; } // kein Pflichfeld!
 
+        public DateTime? VorstellungsTermin { get; set; } // kein Pflichfeld!
+
+        public string? Verbleib { get; set; } // kein Pflichfeld!
+
         public string? Kontakt { get; set; }  // Kontakt Person oder Daten
 
         public DateTime? CreatedDate { get; set; }

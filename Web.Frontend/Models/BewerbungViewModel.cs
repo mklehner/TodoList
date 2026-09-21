@@ -30,6 +30,10 @@ public class BewerbungViewModel
 
     public DateTime? BewerbungsDatum { get; set; } = default; // Kein Pflichtfeld!
 
+    public DateTime? VorstellungsTermin { get; set; } // kein Pflichfeld!
+
+    public string? Verbleib { get; set; } // kein Pflichfeld!
+
     public string? Kontakt { get; set; } // Kontakt Person oder Daten
 
     public DateTime? CreatedDate { get; set; }
