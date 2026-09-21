@@ -1,4 +1,5 @@
 using System.Net;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
@@ -201,7 +202,7 @@ public class BewerbungControllerTests
     {
         await Assert.ThrowsAsync<Exception>(() =>
             _controller.Edit(1, job!, firma!, false, null, false, "Normal", batchId, null, null,
-                "Offen", null, null, null, null, null, null));
+                "Offen", null, null, null, null, null, null, null, null));
 
         Assert.Empty(_handler.Requests); // es wird gar nichts an die API gesendet
     }
@@ -346,15 +347,15 @@ public class BewerbungControllerTests
             jobTitle: "Dev", dueDate: null, priority: "High-Match", unternehmen: "ACME",
             isFreelance: true, notes: null, isCompleted: false, batchId: 4, description: null,
             anschreiben: null, status: "Offen", lebenslauf: null,
-            bewerbungsDatum: new DateTime(2026, 1, 1), kontakt: "k@example.org",
+            bewerbungsDatum: new DateTime(2026, 1, 1), vorstellungsTermin: new DateTime(2026, 9, 17), verbleib: "melde mich wieder", kontakt: "k@example.org",
             createdDate: null, lastChangeDate: null);
 
     private Task<IActionResult> EditSample(int id, DateTime? lastChangeDate = null, DateTime? bewerbungsDatum = null) =>
         _controller.Edit(
             id, jobTitle: "Dev", unternehmen: "ACME", isFreelance: false, notes: null, isCompleted: false,
             priority: "Normal", batchId: 2, description: null, dueDate: null, status: "Gespräch",
-            anschreiben: null, lebenslauf: "cv.pdf", bewerbungsDatum: bewerbungsDatum,
-            kontakt: null, createdDate: null, lastChangeDate: lastChangeDate);
+            anschreiben: null, lebenslauf: "cv.pdf", bewerbungsDatum: bewerbungsDatum, vorstellungsTermin: null,
+            verbleib: null, kontakt: null, createdDate: null, lastChangeDate: lastChangeDate);
 
     /// <summary>Zeichnet Requests samt Body auf (statt async-void-Callbacks an Moq-Mocks).</summary>
     private sealed class RecordingHandler : HttpMessageHandler

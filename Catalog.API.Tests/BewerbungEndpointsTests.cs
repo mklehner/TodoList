@@ -62,6 +62,42 @@ public class BewerbungEndpointsTests : IDisposable
         Assert.False(created.IsCompleted);
         Assert.False(created.IsFreelance);
         Assert.Null(created.BewerbungsDatum);
+        Assert.Null(created.VorstellungsTermin);
+        Assert.Null(created.Verbleib);
+    }
+
+    [Fact]
+    public async Task Post_PersistsVorstellungsTerminAndVerbleib()
+    {
+        var interview = new DateTime(2026, 9, 17, 14, 30, 0);
+
+        var response = await _client.PostAsJsonAsync("/api/bewerbung", new
+        {
+            JobTitle = "Dev", Unternehmen = "ACME", BatchId = 1,
+            VorstellungsTermin = interview, Verbleib = "melde mich wieder"
+        });
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var created = await response.Content.ReadFromJsonAsync<Bewerbung>();
+        var stored = (await LoadAsync(created!.Id))!;
+        Assert.Equal(interview, stored.VorstellungsTermin);
+        Assert.Equal("melde mich wieder", stored.Verbleib);
+    }
+
+    [Fact]
+    public async Task Get_ReturnsVorstellungsTerminAndVerbleib()
+    {
+        var interview = new DateTime(2026, 9, 17, 14, 30, 0);
+        var item = Sample();
+        item.VorstellungsTermin = interview;
+        item.Verbleib = "Absage erhalten";
+        await SeedAsync(item);
+
+        var items = await _client.GetFromJsonAsync<List<Bewerbung>>("/api/bewerbung");
+
+        var single = Assert.Single(items!);
+        Assert.Equal(interview, single.VorstellungsTermin);
+        Assert.Equal("Absage erhalten", single.Verbleib);
     }
 
     [Theory]
@@ -118,6 +154,7 @@ public class BewerbungEndpointsTests : IDisposable
         await SeedAsync(item);
         var due = new DateTime(2030, 1, 1);
         var applied = new DateTime(2030, 2, 2);
+        var interview = new DateTime(2030, 3, 3);
 
         var response = await _client.PutAsJsonAsync($"/api/bewerbung/{item.Id}", new
         {
@@ -133,6 +170,8 @@ public class BewerbungEndpointsTests : IDisposable
             Anschreiben = "a",
             Lebenslauf = "cv.pdf",
             BewerbungsDatum = applied,
+            VorstellungsTermin = interview,
+            Verbleib = "meldet sich",
             Kontakt = "k",
             LastChangeDate = new DateTime(2026, 3, 3)
         });
@@ -151,6 +190,8 @@ public class BewerbungEndpointsTests : IDisposable
         Assert.Equal("a", s.Anschreiben);
         Assert.Equal("cv.pdf", s.Lebenslauf);
         Assert.Equal(applied, s.BewerbungsDatum);
+        Assert.Equal(interview, s.VorstellungsTermin);
+        Assert.Equal("meldet sich", s.Verbleib);
         Assert.Equal("k", s.Kontakt);
         Assert.Equal(new DateTime(2026, 3, 3), s.LastChangeDate);
     }
@@ -200,6 +241,50 @@ public class BewerbungEndpointsTests : IDisposable
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("", (await LoadAsync(item.Id))!.JobTitle);
+    }
+
+    [Fact]
+    public async Task Put_Quirk_IsFullReplace_OmittedOptionalFieldsAreOverwrittenWithNull()
+    {
+        // Der PUT übernimmt jedes Feld des Bodys 1:1. Ein Client, der ein optionales Feld
+        // (z. B. das neue VorstellungsTermin/Verbleib) nicht mitsendet, löscht damit die gespeicherten Daten.
+        var item = Sample();
+        item.BewerbungsDatum = new DateTime(2026, 1, 1);
+        item.VorstellungsTermin = new DateTime(2026, 2, 2);
+        item.Verbleib = "meldet sich";
+        item.Kontakt = "k@example.org";
+        await SeedAsync(item);
+
+        var response = await _client.PutAsJsonAsync($"/api/bewerbung/{item.Id}", new
+        {
+            JobTitle = "Dev", Unternehmen = "ACME", Status = "Offen"
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var s = (await LoadAsync(item.Id))!;
+        Assert.Null(s.BewerbungsDatum);
+        Assert.Null(s.VorstellungsTermin);
+        Assert.Null(s.Verbleib);
+        Assert.Null(s.Kontakt);
+    }
+
+    [Fact]
+    public async Task Put_ClearsVorstellungsTerminAndVerbleib_WhenSentAsNull()
+    {
+        var item = Sample();
+        item.VorstellungsTermin = new DateTime(2026, 2, 2);
+        item.Verbleib = "meldet sich";
+        await SeedAsync(item);
+
+        await _client.PutAsJsonAsync($"/api/bewerbung/{item.Id}", new
+        {
+            JobTitle = "Dev", Unternehmen = "ACME", Status = "Offen",
+            VorstellungsTermin = (DateTime?)null, Verbleib = (string?)null
+        });
+
+        var s = (await LoadAsync(item.Id))!;
+        Assert.Null(s.VorstellungsTermin);
+        Assert.Null(s.Verbleib);
     }
 
     [Fact]
