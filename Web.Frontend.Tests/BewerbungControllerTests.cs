@@ -96,6 +96,8 @@ public class BewerbungControllerTests
         Assert.Equal(4, json.GetProperty("batchId").GetInt32());
         Assert.Equal("Offen", json.GetProperty("status").GetString());
         Assert.Equal("k@example.org", json.GetProperty("kontakt").GetString());
+        Assert.Equal(new DateTime(2026, 9, 17), json.GetProperty("vorstellungsTermin").GetDateTime());
+        Assert.Equal("melde mich wieder", json.GetProperty("verbleib").GetString());
 
         // Create serialisiert camelCase (PostAsJsonAsync), Edit dagegen PascalCase (siehe Quirk-Test unten).
         // CreatedDate = deutsche Ortszeit (UTC+1/+2), LastChangeDate wird bei Create nicht gesendet
@@ -190,6 +192,50 @@ public class BewerbungControllerTests
         await EditSample(id: 1, bewerbungsDatum: new DateTime(2026, 4, 5));
 
         Assert.Equal(new DateTime(2026, 4, 5), _handler.Single.Json.GetProperty("BewerbungsDatum").GetDateTime());
+    }
+
+    [Fact]
+    public async Task Edit_ForwardsVorstellungsTerminAndVerbleib()
+    {
+        _handler.Respond(HttpStatusCode.OK, "{}");
+
+        await EditSample(id: 1, vorstellungsTermin: new DateTime(2026, 9, 17, 14, 30, 0), verbleib: "Absage erhalten");
+
+        var json = _handler.Single.Json;
+        Assert.Equal(new DateTime(2026, 9, 17, 14, 30, 0), json.GetProperty("VorstellungsTermin").GetDateTime());
+        Assert.Equal("Absage erhalten", json.GetProperty("Verbleib").GetString());
+    }
+
+    [Fact]
+    public async Task Edit_VorstellungsTerminAndVerbleibNotSet_AreSentAsNull()
+    {
+        // Wichtig, weil die API-PUTs alle Felder ersetzen: fehlende Werte löschen die gespeicherten Daten
+        _handler.Respond(HttpStatusCode.OK, "{}");
+
+        await EditSample(id: 1);
+
+        var json = _handler.Single.Json;
+        Assert.Equal(JsonValueKind.Null, json.GetProperty("VorstellungsTermin").ValueKind);
+        Assert.Equal(JsonValueKind.Null, json.GetProperty("Verbleib").ValueKind);
+    }
+
+    [Fact]
+    public async Task Create_WithoutBewerbungsDatum_SendsNull()
+    {
+        // bewerbungsDatum ist seit dem letzten Umbau nullable (früher: 0001-01-01 bei leerem Feld)
+        _handler.Respond(HttpStatusCode.Created, "{}");
+
+        await _controller.Create(
+            jobTitle: "Dev", dueDate: null, priority: "Normal", unternehmen: "ACME",
+            isFreelance: false, notes: null, isCompleted: false, batchId: 1, description: null,
+            anschreiben: null, status: "Offen", lebenslauf: null,
+            bewerbungsDatum: null, vorstellungsTermin: null, verbleib: null, kontakt: null,
+            createdDate: null, lastChangeDate: null);
+
+        var json = _handler.Single.Json;
+        Assert.Equal(JsonValueKind.Null, json.GetProperty("bewerbungsDatum").ValueKind);
+        Assert.Equal(JsonValueKind.Null, json.GetProperty("vorstellungsTermin").ValueKind);
+        Assert.Equal(JsonValueKind.Null, json.GetProperty("verbleib").ValueKind);
     }
 
     [Theory]
@@ -350,12 +396,13 @@ public class BewerbungControllerTests
             bewerbungsDatum: new DateTime(2026, 1, 1), vorstellungsTermin: new DateTime(2026, 9, 17), verbleib: "melde mich wieder", kontakt: "k@example.org",
             createdDate: null, lastChangeDate: null);
 
-    private Task<IActionResult> EditSample(int id, DateTime? lastChangeDate = null, DateTime? bewerbungsDatum = null) =>
+    private Task<IActionResult> EditSample(int id, DateTime? lastChangeDate = null, DateTime? bewerbungsDatum = null,
+        DateTime? vorstellungsTermin = null, string? verbleib = null) =>
         _controller.Edit(
             id, jobTitle: "Dev", unternehmen: "ACME", isFreelance: false, notes: null, isCompleted: false,
             priority: "Normal", batchId: 2, description: null, dueDate: null, status: "Gespräch",
-            anschreiben: null, lebenslauf: "cv.pdf", bewerbungsDatum: bewerbungsDatum, vorstellungsTermin: null,
-            verbleib: null, kontakt: null, createdDate: null, lastChangeDate: lastChangeDate);
+            anschreiben: null, lebenslauf: "cv.pdf", bewerbungsDatum: bewerbungsDatum, vorstellungsTermin: vorstellungsTermin,
+            verbleib: verbleib, kontakt: null, createdDate: null, lastChangeDate: lastChangeDate);
 
     /// <summary>Zeichnet Requests samt Body auf (statt async-void-Callbacks an Moq-Mocks).</summary>
     private sealed class RecordingHandler : HttpMessageHandler
